@@ -1,0 +1,32 @@
+ng a predicate that does not exist 
+
+check that variables start with upper case
+
+check that predicate name starts with lower case letter or _ underscore
+predicates in the right hand side are pre-defined
+
+type Obj = String — lower case
+type NumArg = Int 
+
+data Atoms = Var VarName | Str String | Num Int | [T] | _ 
+data Predicate = Unary Name Atoms | Binary Name Atoms Atoms
+data NewPredicate = Unary Name NumArg
+data DefinedPredicate = Unary Name NumArg
+
+ValExp =  LT _ _ | LTE _ _ | GT _ _ | GTE _ _  | EQ _ _  | Add _ _ | Mult _ _ | Div _ _ | Sub _ _ 
+data Exp = Val ValExp | P Predicate
+
+type VarName = String — Upper case
+
+type Head = Predicate
+type Body = Pred Predicate 
+Conj Exp Exp
+| Disj  Exp Exp 
+| Is VarName Exp 
+
+data  Command = 
+Pred2 Predicate 
+| Rule Head  Body
+
+question: should we do run time checking 
+
