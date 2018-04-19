@@ -40,15 +40,18 @@ data Type = TAtom | TInt | TList
 
 -- | Predicate in Prolog, Name + Arguments
 data Predicate = Pred Name [Argu] -- at least one element 
+
 type Argu = Predicate 
           | Atom  
-          | Expr 
+          | Expr
+
 data Atom = Undefined
+
 data Expr = Undefined
 
 -- | Rules in Prolog, Head + Body 
-data Rules = Head Predicate 
-           | Body [Predicate]
+data Rules = Head Predicate [Predicate]
+
 
 
 
