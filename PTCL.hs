@@ -30,7 +30,7 @@ type Name = String
 -- (Shouldn't be the String here, but don't know what it should be )
 
 -- | Basic Type in Prolog 
-data Type = Atom | TInt | TList
+data Type = TAtom | TInt | TList
 
 
 
@@ -42,7 +42,11 @@ data Type = Atom | TInt | TList
 data Predicate = Pred Name [Argu] -- at least one element 
 type Argu = Predicate 
           | Atom  
+          | Expr 
+data Atom = Undefined
+data Expr = Undefined
 
+-- | Rules in Prolog, Head + Body 
 data Rules = Head Predicate 
            | Body [Predicate]
 
