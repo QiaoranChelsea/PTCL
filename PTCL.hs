@@ -63,38 +63,49 @@ data Rules = Head PredicateT Body
 -- female(mona).
 -- female(jackie).
 -- female(marge).
-
+v1 :: Rules 
 v1 = (Head (Pred "female" [TAtom "mona"]) [])
+
+v2 :: Rules 
 v2 = (Head (Pred "female" [TAtom "jackie"]) [])
+
+v3 :: Rules 
 v3 = (Head (Pred "female" [TAtom "marge"]) [])
 
 -- married_/2
 -- married_(abe,mona).
 -- married_(clancy,jackie).
 -- married_(homer,marge).
-
+f1 :: Rules 
 f1 = (Head (Pred "married_" [TAtom "abe", TAtom "mona" ]) [])
+
+f2 :: Rules 
 f2 = (Head (Pred "married_" [TAtom "clancy", TAtom "jackie" ]) [])
+
+f3 :: Rules 
 f3 = (Head (Pred "married_" [TAtom "homer", TAtom "marge" ]) [])
 
 -- married/2
 -- married(X,Y) :- married_(X,Y).
 -- married(X,Y) :- married_(Y,X).
-
+g1 :: Rules 
 g1 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [Var "X", Var "Y" ])])
+
+g2 :: Rules 
 g2 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [Var "Y", Var "X" ])])
 
 -- eq/2
 -- eq(X, Y) :- X = Y.
-
+eq :: Rules 
 eq = (Head (Pred "eq" [Var "X", Var "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
 
 -- double/2
 -- double(X, Y) :- Y is X * 2.
+double :: Rules 
 double = (Head (Pred "double" [Var "X", Var "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
 
-
-t = [v1 , v2 , v3, f1, f2, f3, g1, g2, eq, double]
+prolog :: [Rules]
+prolog = [v1 , v2 , v3, f1, f2, f3, g1, g2, eq, double]
 
 
 typspec :: TypeSpec 
@@ -107,5 +118,7 @@ typspec = [ ("married_",  [TAtom "abe", TAtom "mona",
           , ("double" ,[Var "X", Var "Y" ])
           ]
 
+domain :: Domain 
+domain (prolog,typespec) = (True, "")
 
 
