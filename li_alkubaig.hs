@@ -3,31 +3,61 @@ module PTCL where
 -- | NOTE: 
 --   1. ArguDic should store every declared type associated with name.
 
+-- | The Error Message 
+type Report = String
 -- 
 -- * The Domain of PTCL: Check the given Prolog file against type declaration,
 --   and provide the report.
 
-type Domain = (Prolog, TypeSpec) -> Maybe Error 
+type Domain = (TypeDef,TypeDic, Prog) -> Maybe Report 
 
--- | The Error Message 
-type Error = String
+-- | User defined type
+type TypeDef = [DefinedType]
+type TypeName = String
+type ConstructorName = String
 
+data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])]
+
+-- | Types 
+data Type = TAtom | TInt | TString| TList | TVar | TDef TypeName 
+
+--
+-- * Basic Object of Type Declaration  
+--
+
+-- | A list of the type declaration 
+-- | Type Declaration represented by:
+--   The Name of the predicate associated with type of its arguments
+
+type TypeDic = [Dec]
+type Dec = (PredName, [Type])
+
+-- | Names
+
+type VarName = String -- upper case
+type AtomName = String -- lower case 
+type PredName = String -- lower case 
 
 --
 -- * Basic Object of Prolog Program 
 --
 
 -- | A set of Prolog Predicate 
-type Prolog = [Rules] 
+type Prog = [Rule] 
 
 -- | Rules in Prolog, Head + Body 
-data Rules = Head PredicateT Body
+data Rule = Head PredicateT Body
 
--- | Predicate in Prolog, Name + Arguments
-data PredicateT = Pred PredName [ArguName] 
+data DefinedTypeValue = TType Arg | TData (ConstructorName,[Arg])
 
--- | Name of the Argument
-type ArguName = String 
+data Arg = AtomT AtomName | IntT Int | StringT String| ListT [Arg]  | VarT VarName | DefT TypeName DefinedTypeValue
+
+
+-- list :: TypeArg
+-- list = ListT [( AtomT "Mona"), (IntT 0 ) ]
+
+-- | Predicate in Prolog, Name + [Type Arguments]
+data PredicateT = Pred PredName [Arg] 
 
 -- | Body is a list of BodyElem 
 type Body = [BodyElem]
@@ -41,132 +71,122 @@ data BodyElem  = Predicate PredicateT
      | Oper Opt BodyElem BodyElem 
      | Lit Int 
      | Ref VarName
-
-type VarName = String -- upper case 
-
-
-
--- | Argu Dictionary which stores every declared type associated with corresponding name.
---   The type infomation should in the top of file
---   * The ArguDic is different with the Decl.
---     Decl is the type annotation which declared before the rules
---     ArguDic is the type declaration about the value/argument 
-type TypeDic = [(Type, [ArguName])]
-
-
---
--- * Basic Object of Type Declaration  
---
-
-
--- | A list of the type declaration 
-type TypeSpec = [Decl]
- 
--- | Type Declaration represented by:
---   The Name of the predicate associated with type of its arguments
-type Decl = (PredName, [Type])
-
--- | Names
-type PredName = String -- lower case 
- 
-
-
-type ConstructorName = String
-
--- | Types 
-
-data Type = TAtom | TInt | TString| TList | TVar | D DefinedType
-
--- | Types for user defined type
-data Constructor = ConstructorName [Type]
-data DefinedType = TypeT TypeName Type | DataT TypeName Constructor
-type TypeName = String
-
 --
 -- * Examples
 --
 
--- type Atom = mona 
---           | jacki 
---           | marge 
---           | abe 
---           | clancy 
---           | homer 
--- type Var = X | Y 
+
+-- | Define types 
+
+treeType :: DefinedType
+treeType = ( DataT "Tree" [("Node", [TInt, TDef "Tree", TDef "Tree" ]),("Leaf", []) ])
+
+nameType :: DefinedType
+nameType = ( TypeT "Name" TString )
+
+-- | Declare predicates 
+
+-- predictes_name(type).
+
+d1 :: Dec 
+d1 = ("female", [TAtom])
+
+d2 :: Dec 
+d2 = ("married_", [TAtom, TAtom])
 
 
-typeDic :: TypeDic 
-typeDic = [ (TAtom,[ "mona","jackie","marge","abe","clancy", "homer"])
-          , (TVar,["X","Y"])
-          , (TInt,["2"])]
+d3 :: Dec 
+d3 = ("married", [TVar, TVar])
 
--- female(Atom)
+d4 :: Dec 
+d4 = ("isTree", [TDef "Tree"])
+
+d5 :: Dec 
+d5 = ("names", [TDef "Name"])
 
 -- female(mona).
 -- female(jacki).
 -- female(marge).
 
-v1 :: Rules 
-v1 = (Head (Pred "female" ["mona"]) [])
+v1 :: Rule
+v1 = (Head (Pred "female" [AtomT "mona"]) [])
 
-v2 :: Rules 
-v2 = (Head (Pred "female" ["jackie"]) [])
+v2 :: Rule
+v2 = (Head (Pred "female" [AtomT "jackie"]) [])
 
-v3 :: Rules 
-v3 = (Head (Pred "female" ["marge"]) [])
+v3 :: Rule
+v3 = (Head (Pred "female" [AtomT "marge"]) [])
 
 
-
+-- | Define predicates 
 
 -- married_/2
 -- married_(abe,mona).
 -- married_(clancy,jackie).
 -- married_(homer,marge).
-f1 :: Rules 
-f1 = (Head (Pred "married_" ["abe", "mona" ]) [])
 
-f2 :: Rules 
-f2 = (Head (Pred "married_" ["clancy", "jackie" ]) [])
+f1 :: Rule
+f1 = (Head (Pred "married_" [AtomT "abe", AtomT "mona" ]) [])
 
-f3 :: Rules 
-f3 = (Head (Pred "married_" ["homer", "marge" ]) [])
+f2 :: Rule
+f2 = (Head (Pred "married_" [AtomT "clancy", AtomT "jackie" ]) [])
+
+f3 :: Rule
+f3 = (Head (Pred "married_" [AtomT "homer", AtomT "marge" ]) [])
 
 -- married/2
 -- married(X,Y) :- married_(X,Y).
 -- married(X,Y) :- married_(Y,X).
 
+g1 :: Rule
+g1 = (Head (Pred "married" [VarT "X", VarT "Y" ]) [Predicate (Pred "_married" [ VarT "X", VarT "Y" ])])
 
-g1 :: Rules 
-g1 = (Head (Pred "married" ["X", "Y" ]) [Predicate (Pred "_married" [ "X", "Y" ])])
-
-g2 :: Rules 
-g2 = (Head (Pred "married" ["X", "Y" ]) [Predicate (Pred "_married" ["Y", "X" ])])
+g2 :: Rule
+g2 = (Head (Pred "married" [VarT "X", VarT "Y" ]) [Predicate (Pred "_married" [VarT "Y", VarT "X" ])])
 
 -- eq/2
 -- eq(X, Y) :- X = Y.
-eq :: Rules 
-eq = (Head (Pred "eq" ["X", "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
+eq :: Rule
+eq = (Head (Pred "eq" [VarT "X", VarT "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
 
 -- double/2
 -- double(X, Y) :- Y is X * 2.
-double :: Rules 
-double = (Head (Pred "double" ["X", "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
-
-prolog :: [Rules]
-prolog = [v1 , v2 , v3, f1, f2, f3, g1, g2, eq, double]
+double :: Rule
+double = (Head (Pred "double" [VarT "X", VarT "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
 
 
-typspec :: TypeSpec 
-typspec = [ ("married_",  [TAtom , TAtom , 
-                             TAtom , TAtom , 
-                             TAtom , TAtom  ])
-          , ("married",  [TVar , TVar ])
-          , ("_married",  [TVar , TVar ])
-          , ("eq", [TVar, TVar ])
-          , ("double" ,[TVar , TVar ])
-          ]
+-- treeVal/1
+-- treeVal((Node(3 , Leaf, Leaf) )).
 
-domain :: Domain 
-domain (prolog , typespec) = Nothing
+treeVal :: Arg
+treeVal = ( DefT "Tree" ( TData ("Node", [ IntT 3,  DefT "Tree" (TData ("Leaf", [] )), DefT "Tree" (TData ("Leaf", [] )) ])))
+
+isTree:: Rule 
+isTree = (Head (Pred "isTree" [treeVal ]) [])
+
+
+-- names/1
+-- names("Ghadeer").
+
+nameVal :: Arg
+nameVal = ( DefT "Name" ( TType  (StringT "Ghadeer")))
+
+names:: Rule 
+names = (Head (Pred "names" [nameVal ]) [])
+
+typsdef :: TypeDef
+typsdef = [treeType, nameType]
+
+
+typspec :: TypeDic
+typspec = [ d1, d2, d3]
+
+prolog :: Prog
+prolog = [v1 , v2 , v3, f1, f2, f3, g1, g2, eq, double, names, isTree]
+
+domain :: Domain
+domain (typsdef, typespec, prolog ) = Nothing
+
+
 
 
