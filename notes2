@@ -1,0 +1,129 @@
+<% defined types 
+
+data Tree = Node(Int,Tree,Tree) | Leaf 
+type MyList = List
+
+%>
+
+<#  declarations
+
+female(Atom)
+age(Atom, Int)
+married_(Atom, Atom)
+married(Var, Var)
+eq(Var, Var) 
+tree(Tree)
+isTree(Tree)
+sumTree(Tree, Int )
+listLength(MyList, Int)
+#>
+
+<$ valid program 
+
+female(mona).
+female(jacki).
+female(marge).
+
+age(mona, 6).
+age(jacki, 19).
+age(marge,20).
+
+doubleAge(A,T):-  age(A,Y) , T is Y *2.
+
+married_(abe,mona).
+married_(clancy,jackie).
+married_(homer,marge).
+
+married(X,Y) :- married_(X,Y).
+married(X,Y) :- married_(Y,X).
+
+isEqual(X, Y) :- X = Y.
+double(X, Y) :- Y is X * 2.
+
+tree(leaf).
+tree(node(4,leaf, leaf)).
+tree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
+
+isTree(leaf).
+isTree(node(_, L, R)):- isTree(L),isTree(R).
+
+
+sumTree(leaf, 0 ).
+sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
+
+listLength([], 0).
+listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
+
+$>
+
+<$ invalid program
+
+married_(abe,mona).
+married_(clancy,jackie).
+married_(homer,marge).
+
+age(marge,20).
+ageWrong(6,mona).
+ageWrong('jacki4', 19).
+
+femaleWrong(4).
+femaleWrong('Ghadeer').
+femaleWrong([5,6]).
+
+doubleAgeWrong(A,T):-  age(A,_) , T is A *2.
+
+marriedWrong(_,Y) :- married_('mona4',Y).
+marriedWrong(_,Y) :- married_(Y,'mona4').
+
+doubleWrong(X, Y) :- X * 2 is Y.
+
+treeWrong(leaf(5)).
+treeWrong(node(4,5, nil)).
+treeWrong(4, leaf, node(3,leaf, tree(leaf,leaf, leaf))).
+
+isTreeWrong(leaf).
+isTreeWrong(node(leaf, L, R)):- isTree(L),isTree(R).
+
+
+sumTreeWrong(leaf(0), 0 ).
+sumTreeWrong(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
+ 
+listLength([], 0).
+listLength([H|T], T):-  listLength(T, N) , T is 1 + N.
+
+$>
+
+
+
+<@ test units 
+
+?- isTree(leaf).
+true.
+
+?- isTree(4).
+false.
+
+?- isTree(node(4,4,3)).
+false.
+
+?- isTree(node(4, leaf, leaf)).
+true.
+
+?- isTree(node(4, leaf, node(3,4,5))).
+false.
+
+?- isTree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
+true.
+
+
+?- listLength([5,6,6],X).
+X = 3.
+
+?- listLength([5,6,6,"S"],X).
+X = 4.
+
+?- listLength([],X).
+X = 0.
+
+
+@>
