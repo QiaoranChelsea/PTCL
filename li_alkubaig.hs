@@ -19,7 +19,7 @@ type ConstructorName = String
 data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])]
 
 -- | Types 
-data Type = TAtom | TInt | TString| TList | TVar | TDef TypeName 
+data Type = TAtom | TInt | TString| TList | TDef TypeName 
 
 --
 -- * Basic Object of Type Declaration  
@@ -48,9 +48,9 @@ type Prog = [Rule]
 -- | Rules in Prolog, Head + Body 
 data Rule = Head PredicateT Body
 
-data DefinedTypeValue = TType Arg | TData (ConstructorName,[Arg])
+data DefinedTypeValue = TypeV Arg | DataV (ConstructorName,[Arg])
 
-data Arg = AtomT AtomName | IntT Int | StringT String| ListT [Arg]  | VarT VarName | DefT TypeName DefinedTypeValue
+data Arg = Atom AtomName | LitI Int | LitS String| List [Arg] | Var VarName | Def TypeName DefinedTypeValue
 
 
 -- list :: TypeArg
@@ -79,7 +79,7 @@ data BodyElem  = Predicate PredicateT
 -- | Define types 
 
 treeType :: DefinedType
-treeType = ( DataT "Tree" [("Node", [TInt, TDef "Tree", TDef "Tree" ]),("Leaf", []) ])
+treeType = ( DataT "Tree" [("node", [TInt, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
 
 nameType :: DefinedType
 nameType = ( TypeT "Name" TString )
@@ -96,7 +96,7 @@ d2 = ("married_", [TAtom, TAtom])
 
 
 d3 :: Dec 
-d3 = ("married", [TVar, TVar])
+d3 = ("married", [TAtom, TAtom])
 
 d4 :: Dec 
 d4 = ("isTree", [TDef "Tree"])
@@ -104,21 +104,21 @@ d4 = ("isTree", [TDef "Tree"])
 d5 :: Dec 
 d5 = ("names", [TDef "Name"])
 
--- female(mona).
--- female(jacki).
--- female(marge).
-
+-- -- female(mona).
+-- -- female(jacki).
+-- -- female(marge).
+--
 v1 :: Rule
-v1 = (Head (Pred "female" [AtomT "mona"]) [])
+v1 = (Head (Pred "female" [Atom "mona"]) [])
 
 v2 :: Rule
-v2 = (Head (Pred "female" [AtomT "jackie"]) [])
+v2 = (Head (Pred "female" [Atom "jackie"]) [])
 
 v3 :: Rule
-v3 = (Head (Pred "female" [AtomT "marge"]) [])
+v3 = (Head (Pred "female" [Atom "marge"]) [])
 
 
--- | Define predicates 
+-- | Define predicates
 
 -- married_/2
 -- married_(abe,mona).
@@ -126,42 +126,42 @@ v3 = (Head (Pred "female" [AtomT "marge"]) [])
 -- married_(homer,marge).
 
 f1 :: Rule
-f1 = (Head (Pred "married_" [AtomT "abe", AtomT "mona" ]) [])
+f1 = (Head (Pred "married_" [Atom "abe", Atom "mona" ]) [])
 
 f2 :: Rule
-f2 = (Head (Pred "married_" [AtomT "clancy", AtomT "jackie" ]) [])
+f2 = (Head (Pred "married_" [Atom "clancy", Atom "jackie" ]) [])
 
 f3 :: Rule
-f3 = (Head (Pred "married_" [AtomT "homer", AtomT "marge" ]) [])
+f3 = (Head (Pred "married_" [Atom "homer", Atom "marge" ]) [])
 
 -- married/2
 -- married(X,Y) :- married_(X,Y).
 -- married(X,Y) :- married_(Y,X).
 
 g1 :: Rule
-g1 = (Head (Pred "married" [VarT "X", VarT "Y" ]) [Predicate (Pred "_married" [ VarT "X", VarT "Y" ])])
+g1 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [ Var "X", Var "Y" ])])
 
 g2 :: Rule
-g2 = (Head (Pred "married" [VarT "X", VarT "Y" ]) [Predicate (Pred "_married" [VarT "Y", VarT "X" ])])
+g2 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [Var "Y", Var "X" ])])
 
 -- eq/2
 -- eq(X, Y) :- X = Y.
 eq :: Rule
-eq = (Head (Pred "eq" [VarT "X", VarT "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
+eq = (Head (Pred "eq" [Var "X", Var "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
 
 -- double/2
 -- double(X, Y) :- Y is X * 2.
 double :: Rule
-double = (Head (Pred "double" [VarT "X", VarT "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
+double = (Head (Pred "double" [Var "X", Var "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
 
 
 -- treeVal/1
 -- treeVal((Node(3 , Leaf, Leaf) )).
 
 treeVal :: Arg
-treeVal = ( DefT "Tree" ( TData ("Node", [ IntT 3,  DefT "Tree" (TData ("Leaf", [] )), DefT "Tree" (TData ("Leaf", [] )) ])))
+treeVal = ( Def "Tree" ( DataV ("node", [ LitI 3,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ])))
 
-isTree:: Rule 
+isTree:: Rule
 isTree = (Head (Pred "isTree" [treeVal ]) [])
 
 
@@ -169,9 +169,9 @@ isTree = (Head (Pred "isTree" [treeVal ]) [])
 -- names("Ghadeer").
 
 nameVal :: Arg
-nameVal = ( DefT "Name" ( TType  (StringT "Ghadeer")))
+nameVal = ( Def "Name" ( TypeV  (LitS "Ghadeer")))
 
-names:: Rule 
+names:: Rule
 names = (Head (Pred "names" [nameVal ]) [])
 
 typsdef :: TypeDef
