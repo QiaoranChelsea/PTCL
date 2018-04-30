@@ -1,0 +1,22 @@
+Error Report
+
+Incorrect  Type
+- Couldn’t match expected type  ‘age(Atom, Int)’ with ‘age(Int, Atom)’
+- In the rule “age(6,mona)”
+
+
+- Couldn’t match expected type  ‘female(Atom)’ with ‘female(Int)’ 
+- In the Rule for female: “female(4).”
+
+Incorrect Arities
+- The predicate for age(Atom,Int) expect 2 arguments, but age(mona, 6, 5) has 3 arguments.
+
+Duplicate Declaration
+- Multiple declaration of ‘age’
+- Declared at ‘age(Atom,Int)’,  age(Atom, Int, Int) 
+
+
+Waring 
+Not Declared list : like(abe,mona)
+
+conflicting argument type:  male(5) with male(Jack) 
