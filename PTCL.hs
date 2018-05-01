@@ -11,15 +11,18 @@ type Report = String
 
 type Domain = (TypeDef,TypeDic, Prog) -> Maybe Report 
 
--- | User defined type
+-- | Types 
+data Type = TAtom | TInt | TString| TList | TDef TypeName 
+    deriving(Show)
+-- 
+-- * User defined type
+-- 
 type TypeDef = [DefinedType]
 type TypeName = String
 type ConstructorName = String
 
 data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])]
-
--- | Types 
-data Type = TAtom | TInt | TString| TList | TDef TypeName 
+    deriving(Show)
 
 --
 -- * Basic Object of Type Declaration  
@@ -47,30 +50,31 @@ type Prog = [Rule]
 
 -- | Rules in Prolog, Head + Body 
 data Rule = Head PredicateT Body
-
+    deriving(Show)
 data DefinedTypeValue = TypeV Arg | DataV (ConstructorName,[Arg])
-
+    deriving(Show)
 data Arg = Atom AtomName | LitI Int | LitS String| List [Arg] | Var VarName | Def TypeName DefinedTypeValue
-
+    deriving(Show)
 
 -- list :: TypeArg
 -- list = ListT [( AtomT "Mona"), (IntT 0 ) ]
 
 -- | Predicate in Prolog, Name + [Type Arguments]
 data PredicateT = Pred PredName [Arg] 
-
+    deriving(Show)
 -- | Body is a list of BodyElem 
 type Body = [BodyElem]
 
 -- | Operation includes Mathematic Operation and comparasion
 data Opt = Eq | Neq | And | Lt | Leq | Gt | Gtq | Sub | Add | Div | Mult| Mod 
- 
+    deriving(Show) 
 -- | Element of Body: 
 data BodyElem  = Predicate PredicateT
      | Is BodyElem BodyElem  
      | Oper Opt BodyElem BodyElem 
      | Lit Int 
      | Ref VarName
+     deriving(Show)
 --
 -- * Examples
 --
