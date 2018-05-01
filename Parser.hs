@@ -11,7 +11,7 @@ import PTCL
 
 type Parser = Parsec Void String
 
--- TO DO :
+-- TO DO : 1. How to parse data type with Nonterminal thing and terminal thing together
 
 
 --
@@ -113,9 +113,15 @@ dataType =  do
     return $ DataT tyname dlist 
 
 -- | Parse a list of case in data constructor (separate by "|") 
+-- dataCaseList :: Parser [(ConstructorName,[Type])]
+-- dataCaseList = dataCaseWithArg `sepBy` bar
+--     <|> dataCaseTerminal `sepBy` bar
+
 dataCaseList :: Parser [(ConstructorName,[Type])]
-dataCaseList = dataCaseWithArg `sepBy` bar
-    <|> dataCaseTerminal `sepBy` bar
+dataCaseList = (dataCaseWithArg <|> dataCaseTerminal) `sepBy` bar
+
+-- dataCaseList :: Parser [(ConstructorName,[Type])]
+-- dataCaseList = many1 
 
 -- | parse the name of constructor
 consName :: Parser TypeName 
@@ -140,7 +146,33 @@ dataCaseTerminal = do
 typeList :: Parser [Type]
 typeList = buildinType  `sepBy` comma
 
+--
+-- * Parser for Type Declaration
+--
 
+-- | parse the names
+varName :: Parser VarName
+varName = identifier
+
+atomName :: Parser AtomName
+atomName = identifier
+
+predName :: Parser PredName
+predName = identifier
+
+-- | parse the single declaration
+typedecl :: Parser Dec
+typedecl = do 
+    reservedword "decl" 
+    pn <- predName
+    void (symbol "(") 
+    tplist <- typeList  
+    void (symbol ")")  
+    return (pn, tplist)
+
+--
+-- * Parser for Prolog Program
+--
 
 
 

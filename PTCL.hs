@@ -21,9 +21,11 @@ type TypeDef = [DefinedType]
 type TypeName = String
 type ConstructorName = String
 
-data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])]
-    deriving(Show)
+-- data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])]
+--     deriving(Show)
 
+data DefinedType = TypeT TypeName Type | DataT TypeName [(ConstructorName,[Type])] 
+    deriving(Show)
 --
 -- * Basic Object of Type Declaration  
 --
