@@ -75,39 +75,64 @@ data BodyElem  = Predicate PredicateT
 -- * Examples
 --
 
-
 -- | Define types 
+
+-- data Tree = Node(Int,Tree,Tree) | Leaf
+-- type MyList = List
 
 treeType :: DefinedType
 treeType = ( DataT "Tree" [("node", [TInt, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
 
 nameType :: DefinedType
-nameType = ( TypeT "Name" TString )
+nameType = ( TypeT "MyList" TList )
 
 -- | Declare predicates 
 
 -- predictes_name(type).
+-- dec
+-- female(Atom)
+-- age(Atom, Int)
+-- married_(Atom, Atom)
+-- married(Var, Var)
+-- eq(Var, Var)
+-- tree(Tree)
+-- isTree(Tree)
+-- sumTree(Tree, Int )
+-- listLength(MyList, Int)
+-- end
+--
 
 d1 :: Dec 
 d1 = ("female", [TAtom])
 
 d2 :: Dec 
-d2 = ("married_", [TAtom, TAtom])
-
+d2 = ("age", [TAtom,TInt])
 
 d3 :: Dec 
-d3 = ("married", [TAtom, TAtom])
+d3 = ("married_", [TAtom, TAtom])
 
 d4 :: Dec 
-d4 = ("isTree", [TDef "Tree"])
+d4 = ("married", [TAtom, TAtom])
 
 d5 :: Dec 
-d5 = ("names", [TDef "Name"])
+d5 = ("tree", [TDef "Tree"])
 
--- -- female(mona).
--- -- female(jacki).
--- -- female(marge).
+d6 :: Dec 
+d6 = ("isTree", [TDef "Tree"])
+
+d7 :: Dec 
+d7 = ("sumTree", [TDef "Tree", TInt])
+
+d8 :: Dec 
+d8 = ("listLength", [TDef "MyList", TInt])
+
+
 --
+-- %%%% valid program
+--
+-- female(mona).
+-- female(jacki).
+-- female(marge).
 v1 :: Rule
 v1 = (Head (Pred "female" [Atom "mona"]) [])
 
@@ -117,10 +142,25 @@ v2 = (Head (Pred "female" [Atom "jackie"]) [])
 v3 :: Rule
 v3 = (Head (Pred "female" [Atom "marge"]) [])
 
+-- age(mona, 6).
+-- age(jacki, 19).
+-- age(marge,20).
+v4 :: Rule
+v4 = (Head (Pred "age" [Atom "mona", LitI 6]) [])
+
+v5 :: Rule
+v5 = (Head (Pred "age" [Atom "jacki", LitI 19]) [])
+
+v6 :: Rule
+v6 = (Head (Pred "age" [Atom "marge", LitI 20]) [])
+
+
+-- doubleAge(A,T):-  age(A,Y) , T is Y *2.
+v7 :: Rule
+v7 = (Head (Pred "doubleAge" [Var "A", Var "T"]) [Oper And (Predicate (Pred "age" [Var "A", Var "Y"]) ) (Is (Ref "T") (Oper Mult (Ref "Y") (Lit 2) )) ])
 
 -- | Define predicates
 
--- married_/2
 -- married_(abe,mona).
 -- married_(clancy,jackie).
 -- married_(homer,marge).
@@ -134,55 +174,74 @@ f2 = (Head (Pred "married_" [Atom "clancy", Atom "jackie" ]) [])
 f3 :: Rule
 f3 = (Head (Pred "married_" [Atom "homer", Atom "marge" ]) [])
 
--- married/2
 -- married(X,Y) :- married_(X,Y).
 -- married(X,Y) :- married_(Y,X).
-
 g1 :: Rule
 g1 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [ Var "X", Var "Y" ])])
 
 g2 :: Rule
 g2 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [Var "Y", Var "X" ])])
 
--- eq/2
 -- eq(X, Y) :- X = Y.
-eq :: Rule
-eq = (Head (Pred "eq" [Var "X", Var "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
+e :: Rule
+e = (Head (Pred "eq" [Var "X", Var "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
 
--- double/2
 -- double(X, Y) :- Y is X * 2.
-double :: Rule
-double = (Head (Pred "double" [Var "X", Var "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
+d :: Rule
+d = (Head (Pred "double" [Var "X", Var "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
 
 
--- treeVal/1
--- treeVal((Node(3 , Leaf, Leaf) )).
+-- tree(leaf).
+t1:: Rule
+t1 = (Head (Pred "tree" [( Def "Tree" ( DataV ("leaf", [ ])))] ) [])
 
-treeVal :: Arg
-treeVal = ( Def "Tree" ( DataV ("node", [ LitI 3,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ])))
+-- treeVal((node(3 , Leaf, Leaf) )).
+t2:: Rule
+t2 = (Head (Pred "tree" [( Def "Tree" ( DataV ("node", [ LitI 3,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ]) ) ) ]) [])
 
-isTree:: Rule
-isTree = (Head (Pred "isTree" [treeVal ]) [])
+-- tree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
+t3:: Rule
+t3 = (Head (Pred "tree" [( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )),( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ])))]))) ]) [])
+
+-- isTree(leaf).
+-- isTree(node(_, L, R)):- isTree(L),isTree(R).
+
+i1 :: Rule
+i1 = (Head (Pred "isTree" [( Def "Tree" ( DataV ("leaf", [ ])))] ) [])
+
+i2 :: Rule
+i2 = (Head (Pred "isTree" [( Def "Tree" ( DataV ("node", [ Var "_",  Var "L",  Var "R" ])))]) [Oper And (Predicate (Pred "isTree" [Var "L"]) ) (Predicate (Pred "isTree" [Var "R"]) ) ])
 
 
--- names/1
--- names("Ghadeer").
+-- sumTree(leaf, 0 ).
+-- sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
 
-nameVal :: Arg
-nameVal = ( Def "Name" ( TypeV  (LitS "Ghadeer")))
+s1:: Rule
+s1 = (Head (Pred "sumTree" [( Def "Tree" ( DataV ("leaf", [ ]))) , LitI 0 ] ) [])
 
-names:: Rule
-names = (Head (Pred "names" [nameVal ]) [])
+s2:: Rule
+s2 = (Head (Pred "sumTree" [( Def "Tree" ( DataV ("node", [ Var "_",  Var "L",  Var "R" ]))), Var "T"]) [Oper And (Predicate (Pred "sumTree" [Var "L", Var "N1"]) ) (Oper And  (Predicate (Pred "sumTree" [Var "R", Var "N2"]) ) (Is (Ref "T") (Oper Add (Ref "N1") (Oper Add (Ref "N2") (Ref "T")) ))) ])
+
+-- listLength([], 0).
+-- listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
+
+l1:: Rule
+l1 = (Head (Pred "listLength" [( Def "MyList" ( TypeV ( List []))) , LitI 0 ] ) [])
+
+l2:: Rule
+l2 = (Head (Pred "listLength" [( Def "MyList" ( TypeV (List ((Var "_"):[(Var "T")])))), Var "Total" ]) [Oper And (Predicate (Pred "listLength" [Var "T", Var "N"]) ) (Is (Ref "Total") (Oper Add (Lit 1) (Ref "N"))) ])
+
+
 
 typsdef :: TypeDef
 typsdef = [treeType, nameType]
 
 
 typspec :: TypeDic
-typspec = [ d1, d2, d3]
+typspec = [ d1, d2, d3, d4, d5, d6, d7 , d8 ]
 
 prolog :: Prog
-prolog = [v1 , v2 , v3, f1, f2, f3, g1, g2, eq, double, names, isTree]
+prolog = []
 
 domain :: Domain
 domain (typsdef, typespec, prolog ) = Nothing
