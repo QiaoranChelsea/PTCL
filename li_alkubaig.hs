@@ -232,7 +232,6 @@ l2:: Rule
 l2 = (Head (Pred "listLength" [( Def "MyList" ( TypeV (List ((Var "_"):[(Var "T")])))), Var "Total" ]) [Oper And (Predicate (Pred "listLength" [Var "T", Var "N"]) ) (Is (Ref "Total") (Oper Add (Lit 1) (Ref "N"))) ])
 
 
-
 typsdef :: TypeDef
 typsdef = [treeType, nameType]
 
@@ -241,7 +240,7 @@ typspec :: TypeDic
 typspec = [ d1, d2, d3, d4, d5, d6, d7 , d8 ]
 
 prolog :: Prog
-prolog = []
+prolog = [v1, v2, v3, v4, v5, v6, v7, f1, f2, f3, g1, g2, e, d, t1, t2, t3, i1, t2, s1, s2, l1, l2]
 
 domain :: Domain
 domain (typsdef, typespec, prolog ) = Nothing
