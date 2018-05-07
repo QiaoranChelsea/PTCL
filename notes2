@@ -1,12 +1,8 @@
-<% defined types 
-
 data Tree = Node(Int,Tree,Tree) | Leaf 
 type MyList = List
 
-%>
 
-<#  declarations
-
+dec 
 female(Atom)
 age(Atom, Int)
 married_(Atom, Atom)
@@ -16,9 +12,9 @@ tree(Tree)
 isTree(Tree)
 sumTree(Tree, Int )
 listLength(MyList, Int)
-#>
+end
 
-<$ valid program 
+%%%% valid program 
 
 female(mona).
 female(jacki).
@@ -54,9 +50,9 @@ sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
 listLength([], 0).
 listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
 
-$>
+%%%%%
 
-<$ invalid program
+%%%%% invalid program
 
 married_(abe,mona).
 married_(clancy,jackie).
@@ -79,7 +75,7 @@ doubleWrong(X, Y) :- X * 2 is Y.
 
 treeWrong(leaf(5)).
 treeWrong(node(4,5, nil)).
-treeWrong(4, leaf, node(3,leaf, tree(leaf,leaf, leaf))).
+treeWrong(4, leaf, node(3,leaf, node(leaf,leaf, leaf))).
 
 isTreeWrong(leaf).
 isTreeWrong(node(leaf, L, R)):- isTree(L),isTree(R).
@@ -91,11 +87,10 @@ sumTreeWrong(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 +
 listLength([], 0).
 listLength([H|T], T):-  listLength(T, N) , T is 1 + N.
 
-$>
+%%%%%
 
 
-
-<@ test units 
+%%%%% test units 
 
 ?- isTree(leaf).
 true.
@@ -115,7 +110,6 @@ false.
 ?- isTree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
 true.
 
-
 ?- listLength([5,6,6],X).
 X = 3.
 
@@ -126,4 +120,4 @@ X = 4.
 X = 0.
 
 
-@>
+%%%%%
