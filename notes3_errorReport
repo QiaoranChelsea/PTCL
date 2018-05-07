@@ -20,3 +20,47 @@ Waring
 Not Declared list : like(abe,mona)
 
 conflicting argument type:  male(5) with male(Jack) 
+
+
+
+
+
+** Type Error: 
+- Couldn’t match expected type  "age(Atom, Int)" with "age(Int, Atom)"
+- In the clause “age(6,mona)."
+- Couldn’t match expected type  "age(Atom, Int)" with "age(String, Int)"
+- In the clause “age('jacki4', 19)."
+- Couldn’t match expected type  "female(Atom)" with "female(Int)"
+- In the clause “female(4)."
+- Couldn’t match expected type  "female(Atom)" with "female(String)"
+- In the clause “female('Ghadeer')."
+- Couldn’t match expected type  "female(Atom)" with "female(List)"
+- In the clause “female([5,6])."
+- Couldn’t match expected type  "female(Atom)" with "female(List)"
+- In the clause “female([5,6])."
+- Couldn’t match expected type  "married_(Atom, Atom)" with "married_(String, Atom)"
+- In the clause “married_('mona4',Y)."
+- Couldn’t match expected type  "married_(Atom, Atom)" with "married_(Atom, String)"
+- In the clause “married_(Y,'mona4')."
+- Misuse of "is": expecting Number in the left hand side of "is" in "X * 2 is Y"
+- Couldn’t match expected type  "tree(Tree)" with "tree(?)"
+- In the clause “tree(leaf(5))."
+% - specifically can not unify 
+% - leaf with leaf(Int)
+- Couldn’t match expected type  "tree(Tree)" with "tree(?)"
+- In the clause “tree(node(4,5,nil))."
+% - specifically can not unify 
+% - node(Int,Int,?) with node(Int, Tree, Tree)
+- Couldn’t match expected type  "tree(Tree)" with "tree(?)"
+- In the clause “tree(4, leaf, node(3,leaf, node(leaf,leaf, leaf)))."
+% - specifically can not unify 
+% - node(Tree,Tree,Tree) with node(Int, Tree, Tree)
+- Couldn’t match expected type  "isTree(Tree)" with "isTree(?)"
+- In the clause “isTree(node(leaf, L, R)):- isTree(L),isTree(R)."
+% - specifically can not unify 
+% - node(Tree, Tree, Tree) with node(Int, Tree, Tree)
+- Couldn’t match expected type  "sumTree(Tree, Int)" with "sumTree(?, Int)"
+- In the clause “sumTree(leaf(0), 0 )."
+% - specifically can not unify 
+% - leaf(Int) with leaf
+
