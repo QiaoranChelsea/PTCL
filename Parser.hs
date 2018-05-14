@@ -104,6 +104,7 @@ typeName = identifier
 
 
 -- | Parser for data constructor 
+
 dataType :: Parser DefinedType
 dataType =  do 
     reservedword "data"
@@ -118,7 +119,7 @@ dataType =  do
 --     <|> dataCaseTerminal `sepBy` bar
 
 dataCaseList :: Parser [(ConstructorName,[Type])]
-dataCaseList = (dataCaseWithArg <|> dataCaseTerminal) `sepBy` bar
+dataCaseList = (dataCase) `sepBy` bar
 
 -- dataCaseList :: Parser [(ConstructorName,[Type])]
 -- dataCaseList = many1 
@@ -127,20 +128,15 @@ dataCaseList = (dataCaseWithArg <|> dataCaseTerminal) `sepBy` bar
 consName :: Parser TypeName 
 consName = identifier
 
--- | parse the case of data type (non-terminal)
-dataCaseWithArg :: Parser (ConstructorName,[Type])
-dataCaseWithArg = do 
-    cn      <- consName
-    void (symbol "(")
-    arglist <- typeList
-    void (symbol ")")
-    return (cn,arglist)
-
--- | parse the case of data type (terminal)
-dataCaseTerminal :: Parser (ConstructorName,[Type])
-dataCaseTerminal = do 
+-- | parse each case of data type 
+dataCase :: Parser (ConstructorName,[Type])
+dataCase = do 
     cn <- consName
-    return (cn,[])
+    option ((cn,[])) (do{
+        ; void (symbol "(") 
+        ; arglist <- typeList
+        ; void (symbol ")")
+        ; return (cn,arglist)})
 
 -- | Parse a list of buildin Type seperate by comma
 typeList :: Parser [Type]
