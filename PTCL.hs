@@ -209,39 +209,48 @@ t1 = (Head (Pred "tree" [Arg (Atom "leaf")] ) [])
 
 
 t2:: Rule
-t2 = Head (Pred "tree" [Predicate (Pred "node" [ Arg (LitI 3), Arg (Atom "leaf"), Arg (Atom "leaf")])]  ) []
-{-
+t2 = Head (Pred "tree" [Predicate (Pred "node" [ Arg (LitI 3), Arg (Atom "leaf"), Arg (Atom "leaf")])  ]  ) []
+
+
 -- tree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
 t3:: Rule
-t3 = (Head (Pred "tree" [( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )),( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ])))]))) ]) [])
+t3 = Head (Pred "tree" [Predicate (Pred "node" [ Arg (LitI 4), Arg (Atom "leaf"), Predicate (Pred "node" [ Arg (LitI 3), Arg (Atom "leaf"),  Predicate (Pred "node" [ Arg (LitI 4), Arg (Atom "leaf"), Arg (Atom "leaf")])])])]  ) []
+
 
 -- isTree(leaf).
 -- isTree(node(_, L, R)):- isTree(L),isTree(R).
 
 i1 :: Rule
-i1 = (Head (Pred "isTree" [( Def "Tree" ( DataV ("leaf", [ ])))] ) [])
+i1 = (Head (Pred "isTree" [Arg (Atom "leaf")] ) [])
 
 i2 :: Rule
-i2 = (Head (Pred "isTree" [( Def "Tree" ( DataV ("node", [ Var "_",  Var "L",  Var "R" ])))]) [Oper And (Predicate (Pred "isTree" [Var "L"]) ) (Predicate (Pred "isTree" [Var "R"]) ) ])
+i2 = (Head (Pred "isTree" [Predicate (Pred "node" [ Arg (Var "_"), Arg (Var "L"), Arg (Var "R")])] ) [ Predicate (Pred "isTree" [ Oper And (Arg (Var "R")) (Arg (Var "L")) ])])
+
+
 
 
 -- sumTree(leaf, 0 ).
 -- sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
 
 s1:: Rule
-s1 = (Head (Pred "sumTree" [( Def "Tree" ( DataV ("leaf", [ ]))) , LitI 0 ] ) [])
+s1 = (Head (Pred "sumTree" [Arg (Atom "leaf"), Arg (LitI 0)] ) [])
+
 
 s2:: Rule
-s2 = (Head (Pred "sumTree" [( Def "Tree" ( DataV ("node", [ Var "_",  Var "L",  Var "R" ]))), Var "T"]) [Oper And (Predicate (Pred "sumTree" [Var "L", Var "N1"]) ) (Oper And  (Predicate (Pred "sumTree" [Var "R", Var "N2"]) ) (Is (Ref "T") (Oper Add (Ref "N1") (Oper Add (Ref "N2") (Ref "T")) ))) ])
+s2 = Head (Pred "sumTree" [Predicate (Pred "node" [ Arg (Var "I"), Arg (Var "L"), Arg (Var "R")]), Arg (Var "T") ])  [Oper And (Predicate (Pred "sumTree" [Arg (Var "L"), Arg (Var "N1")]) ) (Oper And  (Predicate (Pred "sumTree" [Arg (Var "R"), Arg(Var "N2")]) ) (Is (Arg(Var "T")) (Oper Add (Arg(Var "N1")) (Oper Add (Arg(Var "N2")) (Arg(Var "T"))) ))) ]
+
+
 
 -- listLength([], 0).
 -- listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
 
 l1:: Rule
-l1 = (Head (Pred "listLength" [( Def "MyList" ( TypeV ( List []))) , LitI 0 ] ) [])
+l1 = (Head (Pred "listLength" [Arg (List []), Arg (LitI 0)] ) [])
+
 
 l2:: Rule
-l2 = (Head (Pred "listLength" [( Def "MyList" ( TypeV (List ((Var "_"):[(Var "T")])))), Var "Total" ]) [Oper And (Predicate (Pred "listLength" [Var "T", Var "N"]) ) (Is (Ref "Total") (Oper Add (Lit 1) (Ref "N"))) ])
+l2 = (Head (Pred "listLength" [Arg (List ((Var "_"):[(Var "T")])), Arg (Var "Total") ]) [Oper And (Predicate (Pred "listLength" [Arg (Var "T"), Arg (Var "N")]) ) (Is (Arg (Var "Total")) (Oper Add  (Arg (LitI 1)) (Arg (Var "N")))) ])
+
 
 
 typsdef :: TypeDef
@@ -256,4 +265,4 @@ prolog = [v1, v2, v3, v4, v5, v6, v7, f1, f2, f3, g1, g2, e, d, t1, t2, t3, i1, 
 
 domain :: Domain
 domain (typsdef, typespec, prolog ) = Nothing
--}
+
