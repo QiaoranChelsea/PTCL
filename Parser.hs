@@ -6,10 +6,12 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 import Text.Megaparsec.Expr
 import qualified Text.Megaparsec.Char.Lexer as L 
+import qualified Text.Parsec.Token as T
 
 import PTCL 
 
 type Parser = Parsec Void String
+
 
 -- TO DO : 1. How to parse data type with Nonterminal thing and terminal thing together
 
@@ -53,6 +55,14 @@ bar = symbol "|"
 newline :: Parser String
 newline = symbol "\n"
 
+quote :: Parser Char
+quote  = char '\"'
+
+
+esc_quote :: Parser Char
+esc_quote  = do {char '\"'; char '\"';}
+
+
 -- | parses the reservedwords and identifiers 
 reservedword :: String -> Parser ()
 reservedword w = lexeme (string w *> notFollowedBy alphaNumChar)
@@ -70,6 +80,21 @@ identifier = (lexeme . try) (p >>= check)
                 then fail $ "keyword " ++ show x ++ " cannot be an identifier"
                 else return x
 
+identifierUpper :: Parser String
+identifierUpper = (lexeme . try) (p >>= check)
+  where
+    p       = (:) <$> upperChar <*> many alphaNumChar
+    check x = if x `elem` reservedwords
+                then fail $ "keyword " ++ show x ++ " cannot be an identifier"
+                else return x
+
+identifierLower :: Parser String
+identifierLower = (lexeme . try) (p >>= check)
+  where
+    p       = (:) <$> lowerChar <*> many alphaNumChar
+    check x = if x `elem` reservedwords
+                then fail $ "keyword " ++ show x ++ " cannot be an identifier"
+                else return x
 --
 -- Parser for Build-in Type 
 --
@@ -82,7 +107,7 @@ buildinType = TAtom <$ reservedword "Atom"
     <|> TDef <$> identifier
 
 --
--- Parser for Defined Type
+-- Parser for User Defined Type
 --
 
 -- | parser for user defined type
@@ -100,7 +125,7 @@ typeType =  do
 
 -- | Parse the type name of user defined
 typeName :: Parser TypeName 
-typeName = identifier
+typeName = identifierUpper
 
 
 -- | Parser for data constructor 
@@ -148,13 +173,24 @@ typeList = buildinType  `sepBy` comma
 
 -- | parse the names
 varName :: Parser VarName
-varName = identifier
+varName = identifierUpper
 
 atomName :: Parser AtomName
-atomName = identifier
+atomName = identifierLower
 
 predName :: Parser PredName
-predName = identifier
+predName = identifierLower
+
+
+
+stringName :: Parser String
+stringName = do 
+    char '"'
+    str <- identifier 
+    char '"'
+    return str
+
+-- stringLiteral
 
 -- | parse the single declaration
 typedecl :: Parser Dec
@@ -170,10 +206,129 @@ typedecl = do
 -- * Parser for Prolog Program
 --
 
+-- (<$) :: Functor f => a -> f b -> f a
+-- (<$>) :: Functor f => (a -> b) -> f a -> f b
+
+rule :: Parser Rule 
+rule = do 
+   hd <- predicateT
+   option (Head hd [])(do{
+       ; void (symbol ":-")
+       ; b <- body 
+       ; void (symbol ".")
+       ; return (Head hd b)})
 
 
 
+-- dataCase :: Parser (ConstructorName,[Type])
+-- dataCase = do 
+--     cn <- consName
+--     option ((cn,[])) (do{
+--         ; void (symbol "(") 
+--         ; arglist <- typeList
+--         ; void (symbol ")")
+--         ; return (cn,arglist)})
 
+-- fact :: Parser Rule 
+-- fact = 
+
+-- headbody :: Parser Rule 
+-- headbody = undefined 
+
+
+definedTypeValue :: Parser DefinedTypeValue
+definedTypeValue = undefined 
+
+body :: Parser [BodyElem]
+body = bodyElem `sepBy` comma
+
+arg :: Parser Arg
+arg =  Atom <$> atomName
+   <|> LitI <$> integer
+   <|> Var <$> varName
+   <|> LitS <$> stringName
+   -- <|> Def <$> typeName <$> definedTypeValue 
+   -- <|> List 
+
+list :: Parser Arg 
+list = listNormal <|> listVar
+
+listVar :: Parser Arg
+listVar = do 
+    void (symbol "[")
+    vnhead <- varName
+    void (symbol "|")
+    vntail <- varName
+    void (symbol "]")
+    return $ List (Var vnhead :[Var vntail])
+
+listNormal :: Parser Arg 
+listNormal = do 
+    void (symbol "[")
+    arglist <- argList
+    void (symbol "]")
+    return $ List arglist   
+
+
+predicateT :: Parser PredicateT
+predicateT = do 
+    pn <- predName 
+    void (symbol "(")
+    alist <- argList 
+    void (symbol ")")
+    return (Pred pn alist)
+
+argList :: Parser [Arg]
+argList = arg  `sepBy` comma
+
+bodyElem :: Parser BodyElem 
+bodyElem = isClause
+   <|>Predicate <$> predicateT
+   <|> Lit <$> integer
+   <|> Ref <$> varName
+
+   -- <|> Is ...
+   -- <|> Oper 
+
+isClause :: Parser BodyElem
+isClause = do 
+  left <- opExpr
+  reservedword "is" 
+  right <- opExpr
+  return $ Is left right
+
+opExpr :: Parser BodyElem
+opExpr =  try compareExpr
+      <|> (makeExprParser opTerm opt)
+
+
+opt :: [[Operator Parser BodyElem]]
+opt =
+  [ [ InfixL (Oper Mult <$ symbol "*")
+    , InfixL (Oper Div  <$ symbol "/") ]
+  , [ InfixL (Oper Add  <$ symbol "+")
+    , InfixL (Oper Sub  <$ symbol "-") ]
+  ]
+
+compareOp :: Parser Opt 
+compareOp = (symbol "=" *> pure Eq)
+  <|> (symbol "!=" *> pure Neq)
+  <|> (symbol "<" *> pure Lt)
+  <|> (symbol "<=" *> pure Leq) 
+  <|> (symbol ">=" *> pure Gtq)
+  <|> (symbol ">" *> pure Gt)
+
+compareExpr :: Parser BodyElem
+compareExpr = do 
+  b1 <- bodyElem
+  op <- compareOp
+  b2 <- bodyElem
+  return $ Oper op b1 b2
+
+opTerm :: Parser BodyElem
+opTerm = parens opExpr
+  <|> Lit <$> integer 
+  <|> Ref <$> varName
 
 
 

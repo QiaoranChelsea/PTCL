@@ -51,17 +51,16 @@ type Prog = [Rule]
 -- | Rules in Prolog, Head + Body 
 data Rule = Head PredicateT Body
     deriving(Show)
--- data DefinedTypeValue = TypeV Arg | DataV (ConstructorName,[Arg])
-    -- deriving(Show)
-data Argument = Atom AtomName | LitI Int | LitS String| List [Argument] | Var VarName  
--- | Def TypeName DefinedTypeValue
+data DefinedTypeValue = TypeV Arg | DataV (ConstructorName,[Arg])
+    deriving(Show)
+data Arg = Atom AtomName | LitI Int | LitS String| List [Arg] | Var VarName | Def TypeName DefinedTypeValue
     deriving(Show)
 
 -- list :: TypeArg
 -- list = ListT [( AtomT "Mona"), (IntT 0 ) ]
 
 -- | Predicate in Prolog, Name + [Type Arguments]
-data PredicateT = Pred PredName [BodyElem] 
+data PredicateT = Pred PredName [Arg] 
     deriving(Show)
 -- | Body is a list of BodyElem 
 type Body = [BodyElem]
@@ -73,9 +72,8 @@ data Opt = Eq | Neq | And | Lt | Leq | Gt | Gtq | Sub | Add | Div | Mult| Mod
 data BodyElem  = Predicate PredicateT
      | Is BodyElem BodyElem  
      | Oper Opt BodyElem BodyElem 
-     | Arg Argument
-     -- | Lit Int 
-     -- | Ref VarName
+     | Lit Int 
+     | Ref VarName
      deriving(Show)
 
 --
@@ -141,32 +139,30 @@ d8 = ("listLength", [TDef "MyList", TInt])
 -- female(jacki).
 -- female(marge).
 v1 :: Rule
-v1 = (Head (Pred "female" [Arg (Atom "mona")]) [])
+v1 = (Head (Pred "female" [Atom "mona"]) [])
 
 v2 :: Rule
-v2 = (Head (Pred "female" [Arg (Atom "jackie")]) [])
+v2 = (Head (Pred "female" [Atom "jackie"]) [])
 
 v3 :: Rule
-v3 = (Head (Pred "female" [Arg (Atom "marge")]) [])
-
+v3 = (Head (Pred "female" [Atom "marge"]) [])
 
 -- age(mona, 6).
 -- age(jacki, 19).
--- -- age(marge,20).
+-- age(marge,20).
 v4 :: Rule
-v4 = (Head (Pred "age" [Arg (Atom "mona"), Arg (LitI 6)]) [])
+v4 = (Head (Pred "age" [Atom "mona", LitI 6]) [])
 
 v5 :: Rule
-v5 = (Head (Pred "age" [Arg ( Atom "jacki"),Arg ( LitI 19)]) [])
+v5 = (Head (Pred "age" [Atom "jacki", LitI 19]) [])
 
 v6 :: Rule
-v6 = (Head (Pred "age" [Arg (Atom "marge"), Arg (LitI 20)]) [])
+v6 = (Head (Pred "age" [Atom "marge", LitI 20]) [])
 
 
--- -- doubleAge(A,T):-  age(A,Y) , T is Y *2.
+-- doubleAge(A,T):-  age(A,Y) , T is Y *2.
 v7 :: Rule
-v7 = (Head (Pred "doubleAge" [Arg ( Var "A"), Arg (Var "T")]) [Oper And (Predicate (Pred "age" [Arg (Var "A"), Arg (Var "Y")]) ) (Is (Arg (Var "T")) (Oper Mult (Arg (Var "Y")) (Arg (LitI 2)) )) ])
-
+v7 = (Head (Pred "doubleAge" [Var "A", Var "T"]) [Oper And (Predicate (Pred "age" [Var "A", Var "Y"]) ) (Is (Ref "T") (Oper Mult (Ref "Y") (Lit 2) )) ])
 
 -- | Define predicates
 
@@ -175,42 +171,39 @@ v7 = (Head (Pred "doubleAge" [Arg ( Var "A"), Arg (Var "T")]) [Oper And (Predica
 -- married_(homer,marge).
 
 f1 :: Rule
-f1 = (Head (Pred "married_" [Arg (Atom "abe"), Arg (Atom "mona" )]) [])
+f1 = (Head (Pred "married_" [Atom "abe", Atom "mona" ]) [])
 
 f2 :: Rule
-f2 = (Head (Pred "married_" [Arg (Atom "clancy"), Arg (Atom "jackie") ]) [])
+f2 = (Head (Pred "married_" [Atom "clancy", Atom "jackie" ]) [])
 
 f3 :: Rule
-f3 = (Head (Pred "married_" [Arg (Atom "homer"), Arg (Atom "marge") ]) [])
+f3 = (Head (Pred "married_" [Atom "homer", Atom "marge" ]) [])
 
 -- married(X,Y) :- married_(X,Y).
 -- married(X,Y) :- married_(Y,X).
 g1 :: Rule
-g1 = (Head (Pred "married" [Arg (Var "X"), Arg (Var "Y") ]) [Predicate (Pred "_married" [ Arg (Var "X"), Arg (Var "Y" )])])
+g1 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [ Var "X", Var "Y" ])])
 
 g2 :: Rule
-g2 = (Head (Pred "married" [Arg (Var "X"), Arg (Var "Y" )]) [Predicate (Pred "_married" [Arg (Var "Y"), Arg (Var "X") ])])
+g2 = (Head (Pred "married" [Var "X", Var "Y" ]) [Predicate (Pred "_married" [Var "Y", Var "X" ])])
 
 -- eq(X, Y) :- X = Y.
 e :: Rule
-e = (Head (Pred "eq" [Arg (Var "X"),Arg ( Var "Y" )]) [Oper Eq (Arg (Var "X")) (Arg (Var "Y"))])
+e = (Head (Pred "eq" [Var "X", Var "Y" ]) [Oper Eq (Ref "X") (Ref "Y")])
 
 -- double(X, Y) :- Y is X * 2.
 d :: Rule
-d = (Head (Pred "double" [Arg (Var "X"), Arg (Var "Y" )]) [ Is (Arg (Var "Y")) (Oper Mult (Arg (Var "X")) (Arg (LitI 2))) ])
+d = (Head (Pred "double" [Var "X", Var "Y" ]) [Is (Ref "Y") (Oper Mult (Ref "X") (Lit 2))])
 
 
--- -- tree(leaf).
+-- tree(leaf).
 t1:: Rule
-t1 = (Head (Pred "tree" [Arg (Atom "leaf")] ) [])
+t1 = (Head (Pred "tree" [( Def "Tree" ( DataV ("leaf", [ ])))] ) [])
 
--- -- tree((node(3 , Leaf, Leaf) )).
--- (Head (Pred "node" [Arg (LitI 3), Arg (Atom "leaf"), Arg (Atom "leaf") ] ) [])
-
-
+-- treeVal((node(3 , Leaf, Leaf) )).
 t2:: Rule
-t2 = Head (Pred "tree" [Predicate (Pred "node" [ Arg (LitI 3), Arg (Atom "leaf"), Arg (Atom "leaf")])]  ) []
-{-
+t2 = (Head (Pred "tree" [( Def "Tree" ( DataV ("node", [ LitI 3,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ]) ) ) ]) [])
+
 -- tree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
 t3:: Rule
 t3 = (Head (Pred "tree" [( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )),( Def "Tree" ( DataV ("node", [ LitI 4,  Def "Tree" (DataV ("leaf", [] )), Def "Tree" (DataV ("leaf", [] )) ])))]))) ]) [])
@@ -256,4 +249,7 @@ prolog = [v1, v2, v3, v4, v5, v6, v7, f1, f2, f3, g1, g2, e, d, t1, t2, t3, i1, 
 
 domain :: Domain
 domain (typsdef, typespec, prolog ) = Nothing
--}
+
+
+
+
