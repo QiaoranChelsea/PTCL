@@ -13,8 +13,8 @@ import PTCL
 type Parser = Parsec Void String
 
 
--- TO DO : 1. How to parse data type with Nonterminal thing and terminal thing together
-
+-- TO DO : 1. and in body
+--         2. underscore 
 
 --
 -- Lexer 
@@ -140,7 +140,7 @@ dataType =  do
 
 -- | Parse a list of case in data constructor (separate by "|") 
 -- dataCaseList :: Parser [(ConstructorName,[Type])]
--- dataCaseList = dataCaseWithArg `sepBy` bar
+-- dataCaseList = dataCaseWithArgument `sepBy` bar
 --     <|> dataCaseTerminal `sepBy` bar
 
 dataCaseList :: Parser [(ConstructorName,[Type])]
@@ -159,9 +159,9 @@ dataCase = do
     cn <- consName
     option ((cn,[])) (do{
         ; void (symbol "(") 
-        ; arglist <- typeList
+        ; argumentlist <- typeList
         ; void (symbol ")")
-        ; return (cn,arglist)})
+        ; return (cn,argumentlist)})
 
 -- | Parse a list of buildin Type seperate by comma
 typeList :: Parser [Type]
@@ -185,9 +185,9 @@ predName = identifierLower
 
 stringName :: Parser String
 stringName = do 
-    char '"'
+    char '\"'
     str <- identifier 
-    char '"'
+    char '\"'
     return str
 
 -- stringLiteral
@@ -214,7 +214,7 @@ rule = do
    hd <- predicateT
    option (Head hd [])(do{
        ; void (symbol ":-")
-       ; b <- body 
+       ; b <- bodyElemList 
        ; void (symbol ".")
        ; return (Head hd b)})
 
@@ -225,9 +225,9 @@ rule = do
 --     cn <- consName
 --     option ((cn,[])) (do{
 --         ; void (symbol "(") 
---         ; arglist <- typeList
+--         ; argumentlist <- typeList
 --         ; void (symbol ")")
---         ; return (cn,arglist)})
+--         ; return (cn,argumentlist)})
 
 -- fact :: Parser Rule 
 -- fact = 
@@ -236,24 +236,21 @@ rule = do
 -- headbody = undefined 
 
 
-definedTypeValue :: Parser DefinedTypeValue
-definedTypeValue = undefined 
 
-body :: Parser [BodyElem]
-body = bodyElem `sepBy` comma
+bodyElemList :: Parser [BodyElem]
+bodyElemList  = bodyElem `sepBy` comma
 
-arg :: Parser Arg
-arg =  Atom <$> atomName
+argument :: Parser Argument
+argument =  Atom <$> atomName
    <|> LitI <$> integer
    <|> Var <$> varName
    <|> LitS <$> stringName
-   -- <|> Def <$> typeName <$> definedTypeValue 
-   -- <|> List 
+   -- list 
 
-list :: Parser Arg 
+list :: Parser Argument 
 list = listNormal <|> listVar
 
-listVar :: Parser Arg
+listVar :: Parser Argument
 listVar = do 
     void (symbol "[")
     vnhead <- varName
@@ -262,10 +259,10 @@ listVar = do
     void (symbol "]")
     return $ List (Var vnhead :[Var vntail])
 
-listNormal :: Parser Arg 
+listNormal :: Parser Argument 
 listNormal = do 
     void (symbol "[")
-    arglist <- argList
+    arglist <- argumentList
     void (symbol "]")
     return $ List arglist   
 
@@ -274,19 +271,17 @@ predicateT :: Parser PredicateT
 predicateT = do 
     pn <- predName 
     void (symbol "(")
-    alist <- argList 
+    blist <- bodyElemList 
     void (symbol ")")
-    return (Pred pn alist)
+    return (Pred pn blist)
 
-argList :: Parser [Arg]
-argList = arg  `sepBy` comma
+argumentList :: Parser [Argument]
+argumentList = argument  `sepBy` comma
 
 bodyElem :: Parser BodyElem 
-bodyElem = isClause
-   <|>Predicate <$> predicateT
-   <|> Lit <$> integer
-   <|> Ref <$> varName
-
+bodyElem = try (Predicate <$> predicateT)
+   <|> try (Arg <$> argument)
+   <|> isClause
    -- <|> Is ...
    -- <|> Oper 
 
@@ -320,15 +315,15 @@ compareOp = (symbol "=" *> pure Eq)
 
 compareExpr :: Parser BodyElem
 compareExpr = do 
-  b1 <- bodyElem
+  b1 <- opTerm
   op <- compareOp
-  b2 <- bodyElem
+  b2 <- opTerm
   return $ Oper op b1 b2
+
 
 opTerm :: Parser BodyElem
 opTerm = parens opExpr
-  <|> Lit <$> integer 
-  <|> Ref <$> varName
+  <|> Arg <$> argument
 
 
 
