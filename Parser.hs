@@ -279,11 +279,14 @@ argumentList :: Parser [Argument]
 argumentList = argument  `sepBy` comma
 
 bodyElem :: Parser BodyElem 
-bodyElem = try (Predicate <$> predicateT)
-   <|> try (Arg <$> argument)
-   <|> isClause
+bodyElem =   try isClause
+   <|> try (Predicate <$> predicateT)
+   <|> ( Arg <$> argument)
+
    -- <|> Is ...
    -- <|> Oper 
+
+
 
 isClause :: Parser BodyElem
 isClause = do 
