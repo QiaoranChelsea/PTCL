@@ -1,8 +1,14 @@
-data Tree = Node(Int,Tree,Tree) | Leaf
-type MyList = List
+sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
 
-decl female(Atom)
+# listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
+# data Tree = node(Int,Tree,Tree) | leaf.
+# data Tree = node(Int,Tree,Tree) | leaf.
+# type MyList = List.
 
-female(mona).
-female(jacki).
-female(marge).
+# decl female(Atom).
+
+# female_(Vona).
+# female(jacki).
+# female(marge).
+
+# doubleAge(A,T):- age(A,Y),T is Y *2.
