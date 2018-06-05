@@ -38,15 +38,16 @@ data DefinedType = TypeT TypeName Type | DataT TypeName [TypeVar] [Cons]
 -- | A set of Prolog Predicate 
 type Prog = [Rule] 
 
+type PredFunA = (String, [Argument])
+
 -- | Rules in Prolog, Head + Body 
-data Rule = Head PredicateA Body
+data Rule = Head PredFunA Body
     deriving(Show)
 
-data Argument = Atom AtomName | LitI Int | LitS String| List [Argument] | Var VarName | Func (FuncName,[Argument]) | OperA OptA Argument Argument 
+data Argument = Atom AtomName | LitI Int | LitS String| List [Argument] | Var VarName | Func PredFunA | OperA OptA Argument Argument 
     deriving(Show)
  
-type PredicateA = (PredName,[Argument] )
-    
+     
 -- | Body is a list of BodyElem 
 type Body = [BodyElem]
 
@@ -59,7 +60,7 @@ data OptC =  Eq | Neq  | Lt | Leq | Gt | Gtq
     deriving(Show) 
     
 -- | Element of Body: 
-data BodyElem  = Pred PredicateA
+data BodyElem  = Pred PredFunA
      | Is Argument Argument
      | OperC OptC Argument Argument 
      | And BodyElem BodyElem 

@@ -1,38 +1,39 @@
 module TypeChecker where
 
 import Types
+
+-- | NOTE:
+--   1. ArguDic should store every declared type associated with name.
+
+
+-- | The Error Message
+
+data ErrType = TErr | ArrT
+
+type Line = Int
+
+
+data Warining = NonDecl PredFunA Bool
+                | Conflict PredFunA PredFunA
+
+data Error = ArgType Dec PredFunA
+            | IncArrit Dec PredFunA
+            | MultDef DefinedType DefinedType
+            | MissIs  BodyElem BodyElem
+            | MultDec Dec Dec
+
+
+-- data Err = E Line Error
+-- data War = W Line Warining
+
+data Report = R (Maybe [Error] ) (Maybe [Warining])
 --
--- -- | NOTE:
--- --   1. ArguDic should store every declared type associated with name.
---
---
--- -- | The Error Message
---
--- data ErrType = TErr | ArrT
---
--- type Line = Int
---
--- data Warining = NonDecl PredicateT Bool
---                 | Conflict PredicateT PredicateT
---
--- data Error = ArgType Dec PredicateT
---             | IncArrit Dec PredicateT
---             | MultDef DefinedType DefinedType
---             | MissIs  BodyElem BodyElem
---             | MultDec Dec Dec
---
---
--- -- data Err = E Line Error
--- -- data War = W Line Warining
---
--- data Report = R (Maybe [Error] ) (Maybe [Warining])
--- --
--- -- * The Domain of PTCL: Check the given Prolog file against type declaration,
--- --   and provide the report.
---
--- type Domain = (TypeDef,TypeDic, Prog) -> Report
---
---
+-- * The Domain of PTCL: Check the given Prolog file against type declaration,
+--   and provide the report.
+
+type Domain = (TypeDef,TypeDic, Prog) -> Report
+
+
 -- ---------------------------------------------------------------------------------------------------------------------------------
 --
 combineTwoMaybe ::  (Maybe [a], Maybe [a]) -> Maybe [a]
@@ -83,9 +84,9 @@ combineTwoMaybe (_,_)  =  Nothing
 -- duplicateDef_ t (x:xs) = if (definedTypeName t == definedTypeName x) then combineTwoMaybe (Just [MultDef t x], duplicateDef_ t xs)
 --                                                                         else duplicateDef_ t xs
 --
--- definedTypeName :: DefinedType -> TypeName
--- definedTypeName (TypeT n _) = n
--- definedTypeName (DataT n _) = n
+definedTypeName :: DefinedType -> TypeName
+definedTypeName (TypeT n _) = n
+definedTypeName (DataT n _ _) = n
 --
 -- ----------------------------------------------------------duplicateDec------------------------------------------------------------------------
 --
@@ -100,8 +101,10 @@ combineTwoMaybe (_,_)  =  Nothing
 -- duplicateDec_ t (x:xs) = if (decName t == decName x) then combineTwoMaybe (Just [MultDec t x], duplicateDec_ t xs)
 --                                                                         else duplicateDec_ t xs
 --
--- decName :: Dec -> TypeName
--- decName (n,_) = n
+decName :: Dec -> TypeName
+decName (PredD (n,_)) = n
+decName (FuncD (n,_,_)) = n
+
 --
 -- ----------------------------------------------------------ArgType IncArrit------------------------------------------------------------------------
 --
