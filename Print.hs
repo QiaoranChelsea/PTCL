@@ -29,7 +29,7 @@ size (_:xs) = 1 + size xs
 printError :: Error -> String
 printError  (ArgType d p) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p ++ "\n" ++ " - In the clause " ++ printPredFunVal p ++ "\n"
 printError  (IncArrit d p) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
-printError  (MultDef t1 t2) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n"
+printError  (MultDef t1 t2) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at: " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n"
 printError  (MissIs b1 b2) = "MissIs\n"
 printError  (MultDec t1 t2) = "- Multiple declaration of " ++ decName t1 ++ "\n- Declared at " ++ printDec t1 ++ " , " ++ printDec t2 ++ "\n"
 
@@ -59,7 +59,9 @@ printType (VarT a) = show a
 
 printTypeDef :: DefinedType -> String
 printTypeDef (TypeT n t) = "type " ++ n ++ " = " ++ printType t
+printTypeDef (DataT n [] ts) = "data " ++ n ++ " = " ++ (printGList ts printCon " | " )
 printTypeDef (DataT n v ts) = "data " ++ n ++ " ( " ++ printGList v show "," ++ " )" ++ " = " ++ (printGList ts printCon " | " )
+
 
 printGList :: [a] -> (a -> String) -> String -> String
 printGList [] _ _ = ""
@@ -79,14 +81,6 @@ printPredFunType  p =  printPredFunc printArgType p
 
 printPredFunc ::  (Argument -> String) -> PredFunA -> String
 printPredFunc f ( n, ts) = n ++ "(" ++ (printGList ts f ",")++ ")"
-
-
---
--- printBodyElems :: (Argument -> String) -> String -> [BodyElem]-> String
--- printBodyElems _ _ [] = ""
--- printBodyElems f _ [x] =  printBodyEle f x
--- printBodyElems f s (x:xs) = printBodyEle f x  ++ s ++ printBodyElems f s xs
-
 
 printOptA :: OptA -> String
 printOptA Sub = " - "
@@ -124,6 +118,11 @@ printArgType (Func  a ) = printPredFunc printArgType a
 printArgType (OperA  o a1 a2 ) = "int" 
 
 
+--
+-- printBodyElems :: (Argument -> String) -> String -> [BodyElem]-> String
+-- printBodyElems _ _ [] = ""
+-- printBodyElems f _ [x] =  printBodyEle f x
+-- printBodyElems f s (x:xs) = printBodyEle f x  ++ s ++ printBodyElems f s xs
 
 -- printBodyEle :: (Argument -> String) -> BodyElem -> String
 -- printBodyEle f (Predicate p ) = printPred f p

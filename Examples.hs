@@ -188,7 +188,7 @@ prolog :: Prog
 prolog = [v1, v2, v3, v3', v4, v5, v6, v7, f1, f2, f3, g1, g2, e, d, t1, t2, t3, i1, t2, s1, s2, l1, l2]
 
 
--- domain :: Domain
--- domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
---
--- v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
+domain :: Domain
+domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
+
+v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
