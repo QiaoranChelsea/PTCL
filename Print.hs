@@ -27,7 +27,7 @@ size (_:xs) = 1 + size xs
 -- -- -- p(X,Y) :- d(X,Y); d(Y,X)
 --
 printError :: Error -> String
-printError  (ArgType d p) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p ++ "\n" ++ " - In the clause " ++ printPredFunVal p ++ "\n"
+printError  (ArgType d p) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
 printError  (IncArrit d p) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
 printError  (MultDef t1 t2) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at: " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n"
 printError  (MissIs b1 b2) = "MissIs\n"

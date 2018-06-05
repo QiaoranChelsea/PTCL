@@ -15,13 +15,13 @@ import Print
 -- type MyList = List
 
 treeType :: DefinedType
-treeType = ( DataT "tree" [] [("node", [TInt, TDef "tree", TDef "tree" ]),("leaf", []) ])
+treeType = ( DataT "Tree" [] [("node", [TInt, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
 
 nameType :: DefinedType
-nameType = ( TypeT "myList" TList )
+nameType = ( TypeT "MyList" TList )
 
 treeType2 :: DefinedType
-treeType2 = ( DataT "tree" [][("node", [TString, TDef "tree", TDef "tree" ]),("leaf", []) ])
+treeType2 = ( DataT "Tree" [][("node", [TString, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
 
 -- | Declare predicates
 
@@ -55,16 +55,16 @@ d4 :: Dec
 d4 = PredD ("married", [TAtom, TAtom])
 
 d5 :: Dec
-d5 = PredD ("tree", [TDef "tree"])
+d5 = PredD ("tree", [TDef "Tree"])
 
 d6 :: Dec
-d6 = PredD ("isTree", [TDef "tree"])
+d6 = PredD ("isTree", [TDef "Tree"])
 
 d7 :: Dec
-d7 = PredD ("sumTree", [TDef "tree", TInt])
+d7 = PredD ("sumTree", [TDef "Tree", TInt])
 
 d8 :: Dec
-d8 = PredD ("listLength", [TDef "myList", TInt])
+d8 = PredD ("listLength", [TDef "MyList", TInt])
 
 --
 -- %%%% valid program

@@ -25,7 +25,7 @@ type TypeDef = [DefinedType]
 type TypeName = String -- upper case
 type TypeVar = String -- lower case
 
-type ConstructorName = String -- upper case
+type ConstructorName = String -- lower case
 type Cons = (ConstructorName,[Type])
 
 data DefinedType = TypeT TypeName Type | DataT TypeName [TypeVar] [Cons]
