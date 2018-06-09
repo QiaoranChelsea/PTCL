@@ -82,8 +82,11 @@ data BodyElem  = Pred PredFunA
 --
 -- entire prolog program
 --
-data Prolog = PL ([(DefinedType, SourcePos)], [(Dec, SourcePos)], [(Rule, SourcePos)])
+data Prolog = PL (TypeDef, TypeDic, Prog)
     deriving (Show)
 
 
+-- newtype SourcePos  = SourcePos {sourceName   :: FilePath  -- Name of source file
+--                                 sourceLine   :: !Pos      -- Line number
+--                                 sourceColumn :: !Pos}     -- Column number 
      
