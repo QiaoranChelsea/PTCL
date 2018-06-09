@@ -1,7 +1,9 @@
 module Print where
 
 import Types
+import ErrorWarTypes
 import TypeChecker
+
 
 
 printReport :: Report -> String
@@ -9,7 +11,7 @@ printReport (R err war) = printMaybeErr err ++ printMaybeWaring war
 
 printMaybeErr :: Maybe [Error] -> String
 printMaybeErr Nothing = "No errors\n"
-printMaybeErr (Just e) = "** Errors **\n" ++ printGList e printError ""
+printMaybeErr (Just e) = "** Errors **\n\n" ++ printGList e printError ""
 
 
 numArDec :: Dec -> Int
@@ -27,11 +29,15 @@ size (_:xs) = 1 + size xs
 -- -- -- p(X,Y) :- d(X,Y); d(Y,X)
 --
 printError :: Error -> String
-printError  (ArgType d p) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
-printError  (IncArrit d p) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
-printError  (MultDef t1 t2) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at: " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n"
-printError  (MissIs b1 b2) = "MissIs\n"
-printError  (MultDec t1 t2) = "- Multiple declaration of " ++ decName t1 ++ "\n- Declared at " ++ printDec t1 ++ " , " ++ printDec t2 ++ "\n"
+printError  (ArgType d p m ) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p m ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
+printError  (IncArrit d p m ) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p m ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
+printError  (MultDef t1 t2 ) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at: " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n\n"
+printError  (MultDec t1 t2) = "- Multiple declaration of " ++ decName t1 ++ "\n- Declared at " ++ printDec t1 ++ " , " ++ printDec t2 ++ "\n\n"
+printError  (MissIs b ) = "Misuse of \"is\": expecting Number in the left hand side of \"is\" in " ++  printBodyEle b ++ "\n\n"
+
+ -- in "5+3 is 8"
+printError  (VariableType b t m) = "VariableType\n\n"
+
 
 
 printMaybeWaring :: Maybe [Warining] -> String
@@ -55,7 +61,7 @@ printType TAtom = "atom"
 printType TString = "string"
 printType TList = "list"
 printType TInt = "int"
-printType (VarT a) = show a
+printType (TVar a) = show a
 
 printTypeDef :: DefinedType -> String
 printTypeDef (TypeT n t) = "type " ++ n ++ " = " ++ printType t
@@ -68,6 +74,11 @@ printGList [] _ _ = ""
 printGList [a] f _ = f a
 printGList (x:xs) f s = f x ++ s ++ printGList xs f s
 
+printGListM :: [a] -> (a -> VarMap -> String) -> String -> VarMap -> String
+printGListM [] _ _ _ = ""
+printGListM [a] f _ m = f a m
+printGListM (x:xs) f s m = f x m ++ s ++ printGListM xs f s m
+
 printCon :: Cons -> String
 printCon (n , []) = n
 printCon (n , ts) = n ++ "(" ++ printGList ts printType "," ++ ")"
@@ -76,8 +87,11 @@ printCon (n , ts) = n ++ "(" ++ printGList ts printType "," ++ ")"
 printPredFunVal :: PredFunA -> String
 printPredFunVal  p = printPredFunc printArgVal p
 
-printPredFunType :: PredFunA -> String
-printPredFunType  p =  printPredFunc printArgType p
+printPredFunType :: PredFunA -> VarMap -> String
+printPredFunType  p m =  printPredFuncM printArgType p m 
+
+printPredFuncM ::  (Argument -> VarMap -> String) -> PredFunA -> VarMap -> String
+printPredFuncM f ( n, ts) m = n ++ "(" ++ (printGListM ts f "," m)++ ")"
 
 printPredFunc ::  (Argument -> String) -> PredFunA -> String
 printPredFunc f ( n, ts) = n ++ "(" ++ (printGList ts f ",")++ ")"
@@ -108,27 +122,32 @@ printArgVal (Func  a ) = printPredFunc printArgVal a
 printArgVal (OperA  o a1 a2 ) = printArgVal a1 ++ printOptA o ++ printArgVal a2 
 
 
-printArgType :: Argument -> String
-printArgType (Atom a ) = "atom"
-printArgType (LitI a ) =  "int"
-printArgType (LitS a ) = "string"
-printArgType (List a ) = "list"
-printArgType (Var a ) = "var"
-printArgType (Func  a ) = printPredFunc printArgType a
-printArgType (OperA  o a1 a2 ) = "int" 
+printArgType :: Argument -> VarMap -> String
+printArgType (Atom a ) _  = "atom"
+printArgType (LitI a ) _ =  "int"
+printArgType (LitS a ) _ = "string"
+printArgType (List a ) _ = "list"
+printArgType (Var a ) m = case findVar a m of
+                            Nothing -> "var"
+                            Just x ->  printType (varType x) 
+printArgType (Func  a ) m = printPredFuncM printArgType a m
+printArgType (OperA  o a1 a2 ) _ = "int" 
 
 
---
--- printBodyElems :: (Argument -> String) -> String -> [BodyElem]-> String
--- printBodyElems _ _ [] = ""
--- printBodyElems f _ [x] =  printBodyEle f x
--- printBodyElems f s (x:xs) = printBodyEle f x  ++ s ++ printBodyElems f s xs
 
--- printBodyEle :: (Argument -> String) -> BodyElem -> String
--- printBodyEle f (Predicate p ) = printPred f p
--- printBodyEle f (Is p1 p2) = printBodyEle f p1 ++ " is " ++ printBodyEle f p2
--- printBodyEle f (Oper op p1 p2) = printBodyEle f p1 ++ printOpt op ++ printBodyEle f p2
--- printBodyEle f (Arg a) = f a
+
+printBodyElems ::  String -> [BodyElem]-> String
+printBodyElems _ [] = ""
+printBodyElems _ [x] =  printBodyEle x
+printBodyElems s (x:xs) = printBodyEle x  ++ s ++ printBodyElems s xs
+
+printBodyEle ::  BodyElem -> String
+printBodyEle (Pred p ) = printPredFunVal p
+printBodyEle (Is p1 p2) = printArgVal p1 ++ " is " ++ printArgVal p2
+printBodyEle (OperC op p1 p2) = printArgVal p1 ++ printOptC op ++ printArgVal p2
+printBodyEle (And  b1 b2) = printBodyEle b1 ++ " , " ++ printBodyEle b2
+
+
 
 
 

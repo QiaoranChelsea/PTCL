@@ -2,7 +2,9 @@ module Examples where
 
 import Types
 import TypeChecker
+import ErrorWarTypes
 import Print
+import Errors
 
 
 --
@@ -66,6 +68,9 @@ d7 = PredD ("sumTree", [TDef "Tree", TInt])
 d8 :: Dec
 d8 = PredD ("listLength", [TDef "MyList", TInt])
 
+d9 :: Dec
+d9 = PredD ("doubleAge", [TAtom,TInt])
+
 --
 -- %%%% valid program
 --
@@ -97,9 +102,10 @@ v6 :: Rule
 v6 = (Head ( "age" ,[ LitI 20, Atom "marge"]) [])
 
 
--- doubleAge(A,T):-  age(A,Y) , T is Y *2.
+-- doubleAge(A,T):-  age(Y,A) , T is A *2. -- error
 v7 :: Rule
-v7 = (Head ("doubleAge", [( Var "A"), (Var "T")]) [ And (Pred ( "age", [(Var "A"),(Var "Y")]) ) (Is ((Var "T")) (OperA Mult ( (Var "Y")) ( (LitI 2)) )) ])
+v7 = (Head ("doubleAge", [( Var "A"), (Var "T")]) [ And (Pred ( "age", [(Var "A"),(Var "Y")]) ) (Is ((Var "T")) (OperA Mult ( (Var "A")) ( (LitI 2)) )) ])
+-- v7 = (Head ("doubleAge", [( Var "A"), (Var "T")]) [ And (Pred ( "age", [(Var "Y"),(Var "A")]) ) (Is ((Var "T")) (OperA Mult ( (Var "A")) ( (LitI 2)) )) ])
 
 
 -- | Define predicates
@@ -131,7 +137,9 @@ e = (Head ( "eq", [ (Var "X"), ( Var "Y" )]) [OperC Eq (Var "X") (Var "Y")])
 
 -- double(X, Y) :- Y is X * 2.
 d :: Rule
-d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (Var "Y") (OperA Mult  (Var "X")  (LitI 2)) ])
+d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (OperA Mult  (Var "X")  (LitI 2)) (Var "Y") ])
+
+-- d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (Var "Y") (OperA Mult  (Var "X")  (LitI 2)) ])
 
 
 -- tree(leaf).
@@ -182,7 +190,7 @@ typsdef = [treeType, treeType2, nameType]
 
 
 typdec :: TypeDic
-typdec = [ d1_1, d1, d2, d3, d4, d5, d6, d7 , d8 ]
+typdec = [ d1_1, d1, d2, d3, d4, d5, d6, d7 , d8, d9 ]
 
 prolog :: Prog
 prolog = [v1, v2, v3, v3', v4, v5, v6, v7, f1, f2, f3, g1, g2, e, d, t1, t2, t3, i1, t2, s1, s2, l1, l2]
@@ -192,3 +200,7 @@ domain :: Domain
 domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
 
 v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
+
+
+k = putStrLn $ typeErrP v7 typdec typsdef
+

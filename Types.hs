@@ -1,8 +1,8 @@
 module Types where
        
 -- | Types 
-data Type = TAtom | TInt | TString| TList | VarT TypeVar | TDef TypeName 
-    deriving(Show)
+data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
+    deriving(Show, Eq)
 --
 -- * Basic Object of Type Declaration  
 --
@@ -65,4 +65,7 @@ data BodyElem  = Pred PredFunA
      | OperC OptC Argument Argument 
      | And BodyElem BodyElem 
      deriving(Show)
+
+
+
      
