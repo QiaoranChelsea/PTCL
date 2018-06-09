@@ -8,6 +8,8 @@ import Text.Megaparsec.Expr
 import qualified Text.Megaparsec.Char.Lexer as L 
 import qualified Text.Parsec.Token as T
 
+import Text.Megaparsec.Pos
+
 import Types 
 import Parser_Lexer
 import Parser_Types
@@ -15,6 +17,12 @@ import Parser_Types
 --
 -- * Parser for Prolog Program
 --
+
+rule  :: Parser (Rule,SourcePos)
+rule = do 
+    rl  <- rule'
+    pos <- getPosition
+    return (rl,pos)
 
 -- | parse a single rule 
 rule' :: Parser Rule 

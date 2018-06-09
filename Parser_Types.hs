@@ -7,6 +7,7 @@ import Text.Megaparsec.Char
 import Text.Megaparsec.Expr
 import qualified Text.Megaparsec.Char.Lexer as L 
 import qualified Text.Parsec.Token as T
+import Text.Megaparsec.Pos
 
 import Types 
 import Parser_Lexer
@@ -29,6 +30,11 @@ buildinType = TAtom <$ reservedword "atom"
 --
 -- Parser for User Defined Type
 --
+definedType :: Parser (DefinedType,SourcePos)
+definedType = do 
+    dt  <- definedType'
+    pos <- getPosition
+    return (dt,pos)
 
 -- | parser for user defined type
 definedType' :: Parser DefinedType
@@ -98,6 +104,11 @@ typeList = buildinType  `sepBy` comma
 --
 -- * Parser for Type Declaration
 --
+typedecl :: Parser (Dec,SourcePos)
+typedecl = do 
+    td  <- typedecl'
+    pos <- getPosition
+    return (td,pos)
 
 -- | parse the single declaration
 typedecl' :: Parser Dec

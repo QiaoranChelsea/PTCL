@@ -98,7 +98,7 @@ identifierLower = (lexeme . try) (p >>= check)
 typeVarName :: Parser TypeName 
 typeVarName = (lexeme . try) (p >>= check >>= checkCapital)
   where
-    p       = (:) <$> char '\'' <*> many lowerChar
+    p       = (:) <$> char '_' <*> many lowerChar
     check x = if x `elem` reservedwords
                 then fail $ "type keyword " ++ show x ++ " cannot be an identifier"
                 else return x

@@ -1,5 +1,7 @@
 module Types where
        
+import Text.Megaparsec.Pos
+
 -- | Types 
 
 data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
@@ -9,7 +11,7 @@ data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName
 -- * Basic Object of Type Declaration  
 --
 -- | A list of the type declaration 
-type TypeDic = [Dec]
+type TypeDic = [(Dec,SourcePos)]
 type PredicateT = (PredName, [Type])
 type FunctorT =   (FuncName,[Type],Type)
 data Dec = PredD PredicateT | FuncD FunctorT
@@ -25,7 +27,7 @@ type FuncName = String -- lower case
 -- 
 -- * User defined type
 -- 
-type TypeDef = [DefinedType]
+type TypeDef = [(DefinedType,SourcePos)]
 type TypeName = String -- upper case
 type TypeVar = String -- lower case start with '
 
@@ -41,7 +43,7 @@ data DefinedType = TypeT TypeName Type
 -- 
 
 -- | A set of Prolog Predicate 
-type Prog = [Rule] 
+type Prog = [(Rule,SourcePos)] 
 
 type PredFunA = (String, [Argument])
 
@@ -77,6 +79,11 @@ data BodyElem  = Pred PredFunA
      | And BodyElem BodyElem 
      deriving(Show)
 
+--
+-- entire prolog program
+--
+data Prolog = PL ([(DefinedType, SourcePos)], [(Dec, SourcePos)], [(Rule, SourcePos)])
+    deriving (Show)
 
 
      

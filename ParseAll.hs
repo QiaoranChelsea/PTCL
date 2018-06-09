@@ -25,31 +25,30 @@ parseFromFile p file = runParser p file <$> readFile file
 
 main = parseFromFile parser "sample.pl"
 
-data Prolog = PL ([DefinedType], [Dec], [Rule])
-    deriving (Show)
+
 
 -- | separate and end by peroid 
-definedType :: Parser [DefinedType]
-definedType = endBy definedType' period
+definedTypes :: Parser [(DefinedType, SourcePos)]
+definedTypes = endBy definedType period
 
 -- typedecl :: Parser [Dec]
 -- typedecl = endBy typedecl' period
 
-typedecl :: Parser [Dec]
-typedecl = do 
+typedecls :: Parser [(Dec,SourcePos)]
+typedecls = do 
     reservedword "decl" 
-    list <- many typedecl'
+    list <- many typedecl
     reservedword "end"
     return list 
 
-rule :: Parser [Rule]
-rule = endBy rule' period
+rules :: Parser [(Rule,SourcePos)]
+rules = endBy rule period
 
 parser' :: Parser Prolog 
 parser' = do 
-    dt <- definedType
-    td <- typedecl
-    rl <- rule
+    dt <- definedTypes
+    td <- typedecls
+    rl <- rules
     return $ PL (dt, td, rl)
 
 parser :: Parser Prolog 
