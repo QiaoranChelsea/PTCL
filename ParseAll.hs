@@ -1,10 +1,12 @@
 module ParseAll where 
 
--- import Parser 
-import Types
-import Parser_Lexer
-import Parser_Types
+
+
 import Parser_Prolog
+import Parser_Types
+import Parser_Lexer
+import Types
+
 
 import Control.Applicative (empty)
 import Control.Monad (void)
@@ -13,13 +15,15 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
+
+-- To do: 1. the parameter type in the Type
+--        2. bodyElem list ... 
+
+
+
 parseFromFile p file = runParser p file <$> readFile file
 
 main = parseFromFile parser "sample.pl"
-
--- data Prolog = DefType [DefinedType]
---             | TypeDel [Dec]
---             | Rules   [Rule]
 
 data Prolog = PL ([DefinedType], [Dec], [Rule])
     deriving (Show)
@@ -28,8 +32,15 @@ data Prolog = PL ([DefinedType], [Dec], [Rule])
 definedType :: Parser [DefinedType]
 definedType = endBy definedType' period
 
-typedel :: Parser [Dec]
-typedel = endBy typedecl' period
+-- typedecl :: Parser [Dec]
+-- typedecl = endBy typedecl' period
+
+typedecl :: Parser [Dec]
+typedecl = do 
+    reservedword "decl" 
+    list <- many typedecl'
+    reservedword "end"
+    return list 
 
 rule :: Parser [Rule]
 rule = endBy rule' period
@@ -37,9 +48,19 @@ rule = endBy rule' period
 parser' :: Parser Prolog 
 parser' = do 
     dt <- definedType
-    td <- typedel
+    td <- typedecl
     rl <- rule
     return $ PL (dt, td, rl)
 
 parser :: Parser Prolog 
 parser = between spaceConsumer eof parser'
+
+
+
+
+
+
+
+
+
+

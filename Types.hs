@@ -1,8 +1,10 @@
 module Types where
        
 -- | Types 
+
 data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
     deriving(Show, Eq)
+
 --
 -- * Basic Object of Type Declaration  
 --
@@ -12,6 +14,7 @@ type PredicateT = (PredName, [Type])
 type FunctorT =   (FuncName,[Type],Type)
 data Dec = PredD PredicateT | FuncD FunctorT
     deriving(Show)
+
 
 -- | Names
 type VarName = String -- upper case
@@ -24,12 +27,13 @@ type FuncName = String -- lower case
 -- 
 type TypeDef = [DefinedType]
 type TypeName = String -- upper case
-type TypeVar = String -- lower case
+type TypeVar = String -- lower case start with '
 
 type ConstructorName = String -- lower case
 type Cons = (ConstructorName,[Type])
 
-data DefinedType = TypeT TypeName Type | DataT TypeName [TypeVar] [Cons]
+data DefinedType = TypeT TypeName Type 
+                 | DataT TypeName [TypeVar] [Cons]
     deriving(Show)
 
 --
@@ -45,7 +49,13 @@ type PredFunA = (String, [Argument])
 data Rule = Head PredFunA Body
     deriving(Show)
 
-data Argument = Atom AtomName | LitI Int | LitS String| List [Argument] | Var VarName | Func PredFunA | OperA OptA Argument Argument 
+data Argument = Atom AtomName 
+              | LitI Int 
+              | LitS String
+              | List [Argument] 
+              | Var VarName 
+              | Func PredFunA 
+              | OperA OptA Argument Argument 
     deriving(Show)
  
      

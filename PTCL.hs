@@ -165,7 +165,7 @@ v6 = (Head (Pred "age" [Arg (Atom "marge"), Arg (LitI 20)]) [])
 
 -- -- doubleAge(A,T):-  age(A,Y) , T is Y *2.
 v7 :: Rule
-v7 = (Head (Pred "doubleAge" [Arg ( Var "A"), Arg (Var "T")]) [Predicate (Pred "age" [Arg (Var "A"), Arg (Var "Y")]), Is (Arg (Var "T")) (Oper Mult (Arg (Var "Y")) (Arg (LitI 2)) ) ])
+v7 = (Head (Pred "doubleAge" [Arg ( Var "A"), Arg (Var "T")]) [Oper And (Predicate (Pred "age" [Arg (Var "A"), Arg (Var "Y")]) ) (Is (Arg (Var "T")) (Oper Mult (Arg (Var "Y")) (Arg (LitI 2)) )) ])
 
 
 -- | Define predicates
@@ -224,8 +224,7 @@ i1 :: Rule
 i1 = (Head (Pred "isTree" [Arg (Atom "leaf")] ) [])
 
 i2 :: Rule
-i2 = Head (Pred "isTree" [Predicate (Pred "node" [ Arg (Var "_"), Arg (Var "L"), Arg (Var "R")])] ) 
-     [ Predicate (Pred "isTree" [(Arg (Var "L"))]), Predicate (Pred "isTree" [(Arg (Var "R"))])]
+i2 = (Head (Pred "isTree" [Predicate (Pred "node" [ Arg (Var "_"), Arg (Var "L"), Arg (Var "R")])] ) [ Predicate (Pred "isTree" [ Oper And (Arg (Var "R")) (Arg (Var "L")) ])])
 
 
 
@@ -238,7 +237,7 @@ s1 = (Head (Pred "sumTree" [Arg (Atom "leaf"), Arg (LitI 0)] ) [])
 
 
 s2:: Rule
-s2 = Head (Pred "sumTree" [Predicate (Pred "node" [ Arg (Var "I"), Arg (Var "L"), Arg (Var "R")]), Arg (Var "T") ])  [Predicate (Pred "sumTree" [Arg (Var "L"), Arg (Var "N1")]), Predicate (Pred "sumTree" [Arg (Var "R"), Arg(Var "N2")]), Is (Arg(Var "T")) (Oper Add (Arg(Var "N1")) (Oper Add (Arg(Var "N2")) (Arg(Var "T"))) )]
+s2 = Head (Pred "sumTree" [Predicate (Pred "node" [ Arg (Var "I"), Arg (Var "L"), Arg (Var "R")]), Arg (Var "T") ])  [Oper And (Predicate (Pred "sumTree" [Arg (Var "L"), Arg (Var "N1")]) ) (Oper And  (Predicate (Pred "sumTree" [Arg (Var "R"), Arg(Var "N2")]) ) (Is (Arg(Var "T")) (Oper Add (Arg(Var "N1")) (Oper Add (Arg(Var "N2")) (Arg(Var "T"))) ))) ]
 
 
 
@@ -246,11 +245,11 @@ s2 = Head (Pred "sumTree" [Predicate (Pred "node" [ Arg (Var "I"), Arg (Var "L")
 -- listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
 
 l1:: Rule
-l1 = Head (Pred "listLength" [Arg (List []), Arg (LitI 0)] ) []
+l1 = (Head (Pred "listLength" [Arg (List []), Arg (LitI 0)] ) [])
 
 
 l2:: Rule
-l2 = Head (Pred "listLength" [Arg (List ((Var "_"):[(Var "T")])), Arg (Var "Total") ]) [ Predicate (Pred "listLength" [Arg (Var "T"), Arg (Var "N")]),  Is (Arg (Var "Total")) (Oper Add  (Arg (LitI 1)) (Arg (Var "N"))) ]
+l2 = (Head (Pred "listLength" [Arg (List ((Var "_"):[(Var "T")])), Arg (Var "Total") ]) [Oper And (Predicate (Pred "listLength" [Arg (Var "T"), Arg (Var "N")]) ) (Is (Arg (Var "Total")) (Oper Add  (Arg (LitI 1)) (Arg (Var "N")))) ])
 
 
 

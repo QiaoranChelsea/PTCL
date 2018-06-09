@@ -107,7 +107,6 @@ bodyElem :: Parser BodyElem
 bodyElem =   try isClause
    <|> try (Pred <$> predFunA)
    <|> try compareExpr
-   -- And
 
 -- | Parse isClause such as Y is 4*3
 isClause :: Parser BodyElem
