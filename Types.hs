@@ -11,6 +11,7 @@ type TypeDic = [Dec]
 type PredicateT = (PredName, [Type])
 type FunctorT =   (FuncName,[Type],Type)
 data Dec = PredD PredicateT | FuncD FunctorT
+    deriving(Show)
 
 -- | Names
 type VarName = String -- upper case

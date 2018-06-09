@@ -1,7 +1,10 @@
 module ParseAll where 
 
-import Parser 
-import PTCL
+-- import Parser 
+import Types
+import Parser_Lexer
+import Parser_Types
+import Parser_Prolog
 
 import Control.Applicative (empty)
 import Control.Monad (void)
