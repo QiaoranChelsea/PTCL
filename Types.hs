@@ -2,12 +2,12 @@ module Types where
        
 import Text.Megaparsec.Pos
 
-
 -- | Types 
 data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
     deriving(Show, Eq)
 
 type Line = Int 
+
 --
 -- * Basic Object of Type Declaration  
 --
@@ -85,7 +85,7 @@ data Prolog = PL (TypeDef, TypeDic, Prog)
     deriving (Show)
 
 
--- newtype Line  = Line {sourceName   :: FilePath  -- Name of source file
+-- newtype SourcePos  = SourcePos {sourceName   :: FilePath  -- Name of source file
 --                                 sourceLine   :: !Pos      -- Line number
 --                                 sourceColumn :: !Pos}     -- Column number 
      

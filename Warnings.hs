@@ -4,11 +4,11 @@ import Text.Megaparsec.Pos
 import ErrorWarTypes
 import Types
 
-checkBody :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> SourcePos -> TypeDic -> TypeDef ->  Maybe [a]
+checkBody :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> Line -> TypeDic -> TypeDef ->  Maybe [a]
 checkBody _ [] _ d def = Nothing
 checkBody f (b:bs) pos d def = combineTwoMaybe (checkBodyEle f b pos d def , checkBody f bs pos d def )
 
-checkBodyEle :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem -> SourcePos->  TypeDic -> TypeDef ->  Maybe [a]
+checkBodyEle :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem -> Line->  TypeDic -> TypeDef ->  Maybe [a]
 checkBodyEle f (Pred p ) pos d def = f p pos d def
 checkBodyEle f (And b1 b2) pos d def = combineTwoMaybe (checkBodyEle f b1 pos d def , checkBodyEle f b2 pos d def)
 checkBodyEle _ _ _ _ _ = Nothing
@@ -21,11 +21,11 @@ nonDecWarning [] _ _ = Nothing
 nonDecWarning (p:ps) d f = combineTwoMaybe (nonDecWarning_ p d f, nonDecWarning ps d f)
 
 -- find non declared predicates in rule
-nonDecWarning_ :: (Rule,SourcePos) -> TypeDic -> TypeDef -> Maybe [War]
+nonDecWarning_ :: (Rule,Line) -> TypeDic -> TypeDef -> Maybe [War]
 nonDecWarning_ ((Head p b ),pos) d f = combineTwoMaybe (doesExist p pos d f , checkBody doesExist b  pos d f )
 
 -- find if this pred exist in dec list
-doesExist :: PredFunA -> SourcePos -> TypeDic -> TypeDef  -> Maybe [War]
+doesExist :: PredFunA -> Line -> TypeDic -> TypeDef  -> Maybe [War]
 doesExist p pos [] _  =  Just [W pos (NonDecl p False)]
 doesExist p@(n, _ ) pos ((d,_):ds) f = if n == decName d then Nothing
                                             else doesExist p pos ds f
@@ -48,7 +48,7 @@ doesConflict w@(W pos (NonDecl p False)) (x:xs) = case x of
 doesConflict _ ls = Just ls
 
 
-unify:: (PredFunA,SourcePos) -> (PredFunA,SourcePos) -> Maybe [War]
+unify:: (PredFunA,Line) -> (PredFunA,Line) -> Maybe [War]
 unify (t1@(n1,b1),pos1) (t2@(n2, b2),pos2) = if (n1 == n2 && (unifyBodies b1 b2 == False)) then (Just [(W pos2 (Conflict t1 t2))]  )
                                   else Nothing
 

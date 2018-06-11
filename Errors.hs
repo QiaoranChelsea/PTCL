@@ -5,12 +5,12 @@ import ErrorWarTypes
 import Types
 
 
-checkBodyW :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> [BodyElem] -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+checkBodyW :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> [BodyElem] -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 checkBodyW _ [] p d def m = (m, Nothing)
 checkBodyW f (b:bs) p d def m =  let (m', r ) = checkBodyEleW f b p d def m in
                                let (m'', r') =  checkBodyW f bs p d def m' in  (m'',combineTwoMaybe (r, r'))
 
-checkBodyEleW :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> BodyElem -> SourcePos ->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+checkBodyEleW :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> BodyElem -> Line ->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 checkBodyEleW f (Pred p ) pos d def m = f p pos d def m
 checkBodyEleW f (And b1 b2) pos d def m =
                                let (m', r ) = checkBodyEleW f b1 pos d def m in
@@ -28,7 +28,7 @@ duplicateDef :: TypeDef -> Maybe [Err]
 duplicateDef [] = Nothing
 duplicateDef (x:xs) = combineTwoMaybe(duplicateDef_ x xs, duplicateDef xs)
 
-duplicateDef_ :: (DefinedType, SourcePos) -> TypeDef -> Maybe [Err]
+duplicateDef_ :: (DefinedType, Line) -> TypeDef -> Maybe [Err]
 duplicateDef_ _ [] = Nothing
 duplicateDef_ v@(t,p) ((x,_):xs) = if (definedTypeName t == definedTypeName x) then combineTwoMaybe (Just [E p (MultDef t x) ], duplicateDef_ v xs)
                                                                         else duplicateDef_  v xs
@@ -42,14 +42,14 @@ duplicateDec :: TypeDic -> Maybe [Err]
 duplicateDec [] = Nothing
 duplicateDec (x:xs) = combineTwoMaybe(duplicateDec_ x xs, duplicateDec xs)
 
-duplicateDec_ :: (Dec, SourcePos) -> TypeDic -> Maybe [Err]
+duplicateDec_ :: (Dec, Line) -> TypeDic -> Maybe [Err]
 duplicateDec_ _ [] = Nothing
 duplicateDec_ v@(t,p) ((x,_):xs) = if (decName t == decName x) then combineTwoMaybe (Just [E p (MultDec t x)], duplicateDec_ v xs)
                                                                         else duplicateDec_ v xs
 
 ------------------------------------------------------Is Oper----------------------------------------------------------------------
 
-comErr :: BodyElem -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+comErr :: BodyElem -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 comErr b@(OperC Eq l r) _ _ def m   =  (m, Nothing) -- revise
 comErr b@(OperC Neq l r) _ _ def m  = (m, Nothing) -- revise
 comErr b@(OperC o l r) pos _ def m    = let (m',x) = (unifyArgT TInt l def m) in
@@ -63,7 +63,7 @@ comErr b@(OperC o l r) pos _ def m    = let (m',x) = (unifyArgT TInt l def m) in
 -- unifyTwoArgs l r _ def m = findVar
 --
 -- ([("c",TInt)] ++ m,Nothing)
-isErr :: BodyElem -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+isErr :: BodyElem -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 isErr b@(Is (LitI _) _) pos d def m = isErr_ b pos d def m
 isErr b@(Is l@(Var _) _) pos d def m  =  let (m',x) = unifyArgT TInt l def m in
                                     let ri@(m'', x') = isErr_ b pos d def m' in
@@ -78,7 +78,7 @@ isErr b@(Is l r) pos _ def m        = let err = (E pos (MissIs b)) in
                                     False ->  (m'', Just(err:[E pos (VariableType b TInt m'')]))
 
 
-isErr_ :: BodyElem -> SourcePos -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+isErr_ :: BodyElem -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 isErr_ b@(Is _ r) pos d def m = let (m',x) = (unifyArgT TInt r def m) in
                                         case x of
                                          True -> (m', Nothing)
@@ -94,14 +94,14 @@ typeErrs [] _ _ = Nothing
 typeErrs (p:ps) d f = combineTwoMaybe (typeErr p d f , typeErrs ps d f )
 
 -- type check a rule
-typeErr :: (Rule, SourcePos) -> TypeDic ->TypeDef -> Maybe [Err]
+typeErr :: (Rule, Line) -> TypeDic ->TypeDef -> Maybe [Err]
 typeErr ((Head p b ),pos) d f =
     let ( m,r)= doesMatch p pos d f [] in
     let (m',r') = checkBodyW doesMatch b pos d f m in
     combineTwoMaybe (r,r' )
 
 -- find if a predicate or functor matches the type dic
-doesMatch :: PredFunA -> SourcePos -> TypeDic ->TypeDef -> VarMap -> (VarMap, Maybe [Err])
+doesMatch :: PredFunA -> Line -> TypeDic ->TypeDef -> VarMap -> (VarMap, Maybe [Err])
 doesMatch _ _ [] _ m =  (m, Nothing)
 doesMatch p@(n, b ) pos ((d,_):ds) f m =
             if n == decName d
@@ -111,7 +111,7 @@ doesMatch p@(n, b ) pos ((d,_):ds) f m =
             else  doesMatch p pos ds f m
 
 -- add the error to the report based on the type of the error
-errorType :: Maybe ErrType -> PredFunA -> SourcePos -> Dec -> VarMap-> Maybe [Err]
+errorType :: Maybe ErrType -> PredFunA -> Line -> Dec -> VarMap-> Maybe [Err]
 errorType Nothing  _ _ _   _  = Nothing
 errorType (Just TErr) p pos d m = Just [E pos (ArgType d p m )]
 errorType (Just ArrT) p pos d m= Just [E pos (IncArrit d p m)]
@@ -186,12 +186,12 @@ replcaceType (x:xs) s t = if (varName x) == s then ((s,t):xs) else replcaceType 
 ----------------------------------------------------------unify------------------------------------------------------------------------
 
 -- find if a type exist in defined types
-findType :: TypeName -> TypeDef -> Maybe (DefinedType,SourcePos)
+findType :: TypeName -> TypeDef -> Maybe (DefinedType,Line)
 findType _ [] = Nothing
 findType n (v@(x,_):xs) = if definedTypeName x == n then Just v else findType n xs
 
 -- unify argumnet with defined type (data/type)
-unifyDefinedType :: (DefinedType,SourcePos) -> Argument -> TypeDef -> VarMap -> (VarMap, Bool)
+unifyDefinedType :: (DefinedType,Line) -> Argument -> TypeDef -> VarMap -> (VarMap, Bool)
 unifyDefinedType ((TypeT _ t ),_) a f m = unifyArgT t a f m
 unifyDefinedType ((DataT _ _ cs ),_) a f m = unifyDef a cs f m
 

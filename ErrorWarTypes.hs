@@ -23,8 +23,8 @@ data Error = ArgType Dec PredFunA VarMap
 type VarType = (VarName,Type)
 type VarMap = [VarType]
 
-data Err = E SourcePos Error
-data War = W SourcePos Warining
+data Err = E Line Error
+data War = W Line Warining
 
 data Report = R (Maybe [Err] ) (Maybe [War])
 --
@@ -72,8 +72,8 @@ constructorTypes :: Cons -> [Type]
 constructorTypes (_,t) = t
 
 
-getPos :: (a,SourcePos) -> SourcePos
+getPos :: (a,Line) -> Line
 getPos (_,p) = p
 
-getObj :: (a,SourcePos) -> a
+getObj :: (a,Line) -> a
 getObj (a,_) = a
