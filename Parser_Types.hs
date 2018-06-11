@@ -123,7 +123,7 @@ predTypeDecl =  do
     void (symbol "(") 
     tplist <- typeList  
     void (symbol ")")
-    -- void (symbol ".")
+    void (symbol ".") <?> "type declaration should end with '.' "
     return (PredD (pn, tplist))
 
 -- | parse the type declaration of functor which has the return type
@@ -136,7 +136,7 @@ funcTypeDecl = do
     void (symbol ")")
     void (symbol "->")
     rtlist <- buildinType
-    -- void (symbol ".")
+    void (symbol ".") <?> "type declaration should end with '.' "
     return (FuncD (pn, tplist,rtlist))
 
 

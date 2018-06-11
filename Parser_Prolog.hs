@@ -50,17 +50,12 @@ argument = try optAExpr
    <|> try listVar
    <|> (Var <$> varName)
 
-   
--- argument :: Parser Argument
--- argument = try (Atom <$> atomName)
---         <|>Func <$> predFunA
-
 predFunA :: Parser PredFunA 
 predFunA = do 
     fn <- funcName 
     void (symbol "(")
     arglist <- argumentList 
-    void (symbol ")")
+    void (symbol ")") 
     return (fn,arglist)
 
 argumentList :: Parser [Argument]
@@ -122,7 +117,7 @@ bodyElem =   try isClause
 -- | Parse isClause such as Y is 4*3
 isClause :: Parser BodyElem
 isClause = do 
-  left <- argument 
+  left <- argument  
   reservedword "is" 
   right <- argument
   return $ Is left right

@@ -30,7 +30,7 @@ main = parseFromFile parser "sample.pl"
 
 -- | separate and end by peroid 
 definedTypes :: Parser [(DefinedType, Line)]
-definedTypes = endBy definedType period
+definedTypes = endBy definedType period 
 
 -- typedecl :: Parser [Dec]
 -- typedecl = endBy typedecl' period
@@ -38,9 +38,9 @@ definedTypes = endBy definedType period
 typedecls :: Parser [(Dec,Line)]
 typedecls = option ([])$ do 
     reservedword "decl" 
-    -- list <- many typedecl
-    list <- endBy typedecl period
-    reservedword "end"
+    list <- many typedecl 
+    -- list <- endBy typedecl period
+    reservedword "end" <?> "declaration should enclosed between 'decl' and 'end' "
     return list 
 
 rules :: Parser [(Rule,Line)]
