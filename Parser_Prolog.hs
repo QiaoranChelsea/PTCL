@@ -42,15 +42,18 @@ rule' = do
 -- | parse the argument Name 
 argument :: Parser Argument
 argument = try optAExpr
+   <|> try (Func <$> predFunA)
    <|> try (Atom <$> atomName)
    <|> try (LitI <$> integer)
    <|> try (LitS <$> stringName)
    <|> try listNormal
    <|> try listVar
-   <|> try (Var <$> varName)
-   <|> try (Func <$> predFunA)
-   
+   <|> (Var <$> varName)
 
+   
+-- argument :: Parser Argument
+-- argument = try (Atom <$> atomName)
+--         <|>Func <$> predFunA
 
 predFunA :: Parser PredFunA 
 predFunA = do 

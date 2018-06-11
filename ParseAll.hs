@@ -18,6 +18,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 -- To do: 1. the parameter type in the Type
 --        2. bodyElem list ... 
+--        3. var .. should we have a type var?
 
 
 

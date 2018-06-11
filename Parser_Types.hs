@@ -27,6 +27,7 @@ buildinType = TAtom <$ reservedword "atom"
     <|> TDef <$> identifier
 
 
+
 --
 -- Parser for User Defined Type
 --

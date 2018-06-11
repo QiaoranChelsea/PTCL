@@ -60,7 +60,7 @@ reservedword w = lexeme (string w *> notFollowedBy alphaNumChar)
 
 -- | list of reserved words in scope of type
 reservedwords :: [String]
-reservedwords = ["atom","int", "list", "stirng", "data", "type", "decl", "end", "is"]
+reservedwords = ["atom","int", "list", "stirng", "data", "type", "decl", "end", "is", "var"]
 
 
 -- | 
