@@ -1,56 +1,55 @@
 module Warnings where
 
+import Text.Megaparsec.Pos
 import ErrorWarTypes
 import Types
 
-checkBody :: (PredFunA -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> TypeDic -> TypeDef ->  Maybe [a]
-checkBody _ [] d def = Nothing
-checkBody f (b:bs) d def = combineTwoMaybe (checkBodyEle f b d def , checkBody f bs d def )
+checkBody :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> SourcePos -> TypeDic -> TypeDef ->  Maybe [a]
+checkBody _ [] _ d def = Nothing
+checkBody f (b:bs) pos d def = combineTwoMaybe (checkBodyEle f b pos d def , checkBody f bs pos d def )
 
-checkBodyEle :: (PredFunA -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem ->  TypeDic -> TypeDef ->  Maybe [a]
-checkBodyEle f (Pred p ) d def = f p d def
-checkBodyEle f (And b1 b2) d def = combineTwoMaybe (checkBodyEle f b1 d def , checkBodyEle f b2 d def)
-checkBodyEle _ _ _ _ = Nothing
+checkBodyEle :: (PredFunA -> SourcePos -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem -> SourcePos->  TypeDic -> TypeDef ->  Maybe [a]
+checkBodyEle f (Pred p ) pos d def = f p pos d def
+checkBodyEle f (And b1 b2) pos d def = combineTwoMaybe (checkBodyEle f b1 pos d def , checkBodyEle f b2 pos d def)
+checkBodyEle _ _ _ _ _ = Nothing
 
+-- ----------------------------------------------------------nonDec------------------------------------------------------------------------
 
-
-----------------------------------------------------------nonDec------------------------------------------------------------------------
-
--- find non declared predicates 
-nonDecWarning :: Prog -> TypeDic -> TypeDef -> Maybe [Warining]
+-- find non declared predicates
+nonDecWarning :: Prog -> TypeDic -> TypeDef -> Maybe [War]
 nonDecWarning [] _ _ = Nothing
 nonDecWarning (p:ps) d f = combineTwoMaybe (nonDecWarning_ p d f, nonDecWarning ps d f)
 
 -- find non declared predicates in rule
-nonDecWarning_ :: Rule -> TypeDic -> TypeDef -> Maybe [Warining]
-nonDecWarning_ (Head p b ) d f = combineTwoMaybe (doesExist p d f  , checkBody doesExist  b d f )
+nonDecWarning_ :: (Rule,SourcePos) -> TypeDic -> TypeDef -> Maybe [War]
+nonDecWarning_ ((Head p b ),pos) d f = combineTwoMaybe (doesExist p pos d f , checkBody doesExist b  pos d f )
 
--- find if this pred exist in dec list 
-doesExist :: PredFunA -> TypeDic -> TypeDef  -> Maybe [Warining]
-doesExist p [] _ =  Just [NonDecl p False]
-doesExist p@(n, _ ) (d:ds)  f = if n == decName d then Nothing
-                                            else doesExist p ds f
+-- find if this pred exist in dec list
+doesExist :: PredFunA -> SourcePos -> TypeDic -> TypeDef  -> Maybe [War]
+doesExist p pos [] _  =  Just [W pos (NonDecl p False)]
+doesExist p@(n, _ ) pos ((d,_):ds) f = if n == decName d then Nothing
+                                            else doesExist p pos ds f
 
 -------------------------------------------------------Conflict---------------------------------------------------------------------------
 
-conflict :: [Warining] ->  [Warining] -> Maybe [Warining]
+conflict :: [War] ->  [War] -> Maybe [War]
 conflict  [] ls = Just ls
 conflict (x:xs) ls = case doesConflict x ls of
                           Nothing -> conflict xs ls
                           Just y -> conflict xs y
 
-doesConflict :: Warining -> [Warining] -> Maybe [Warining]
+doesConflict :: War -> [War] -> Maybe [War]
 doesConflict _ [] = Nothing
-doesConflict w@(NonDecl p False) (x:xs) = case x of
-                    (NonDecl p' False) -> case unify p p' of
-                                            Just y -> combineTwoMaybe (combineTwoMaybe (Just [(NonDecl p' True)], doesConflict w xs) , Just y )
+doesConflict w@(W pos (NonDecl p False)) (x:xs) = case x of
+                    (W pos' (NonDecl p' False)) -> case unify (p,pos) (p',pos') of
+                                            Just y -> combineTwoMaybe (combineTwoMaybe (Just [W pos' (NonDecl p' True)], doesConflict w xs) , Just y )
                                             Nothing -> combineTwoMaybe ( Just [x] , doesConflict w xs)
                     _  -> combineTwoMaybe (Just [x], doesConflict w xs)
 doesConflict _ ls = Just ls
 
 
-unify:: PredFunA -> PredFunA -> Maybe [Warining]
-unify t1@(n1,b1) t2@(n2, b2) = if (n1 == n2 && (unifyBodies b1 b2 == False)) then (Just [Conflict t1 t2]  )
+unify:: (PredFunA,SourcePos) -> (PredFunA,SourcePos) -> Maybe [War]
+unify (t1@(n1,b1),pos1) (t2@(n2, b2),pos2) = if (n1 == n2 && (unifyBodies b1 b2 == False)) then (Just [(W pos2 (Conflict t1 t2))]  )
                                   else Nothing
 
 unifyBodies :: [Argument] -> [Argument] -> Bool
@@ -69,8 +68,8 @@ unifyArg x y = case x of
                             (List _ ) ->  unifyList y
                             (Var _ ) -> True
                             (Func _ ) -> True
-                          
-                            
+
+
 unifyAtom :: Argument  -> Bool
 unifyAtom (Atom _ ) = True
 unifyAtom (Var _ ) = True

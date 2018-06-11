@@ -1,13 +1,12 @@
 module ErrorWarTypes where
-
+    
+import Text.Megaparsec.Pos
 import Types
 
 
 -- | The Error Message
 
 data ErrType = TErr | ArrT
-
-type Line = Int
 
 data Warining = NonDecl PredFunA Bool
                 | Conflict PredFunA PredFunA
@@ -24,10 +23,10 @@ data Error = ArgType Dec PredFunA VarMap
 type VarType = (VarName,Type)
 type VarMap = [VarType]
 
--- data Err = E Line Error
--- data War = W Line Warining
+data Err = E SourcePos Error
+data War = W SourcePos Warining
 
-data Report = R (Maybe [Error] ) (Maybe [Warining])
+data Report = R (Maybe [Err] ) (Maybe [War])
 --
 -- * The Domain of PTCL: Check the given Prolog file against type declaration,
 --   and provide the report.
@@ -60,10 +59,10 @@ findVar _ [] = Nothing
 findVar s (x:xs) = if (varName x) == s then Just x else findVar s xs
 
 varName :: VarType -> VarName
-varName = fst 
+varName = fst
 
 varType :: VarType -> Type
-varType = snd 
+varType = snd
 
 
 constructorName :: Cons -> ConstructorName
@@ -71,3 +70,10 @@ constructorName (n,_) = n
 
 constructorTypes :: Cons -> [Type]
 constructorTypes (_,t) = t
+
+
+getPos :: (a,SourcePos) -> SourcePos
+getPos (_,p) = p
+
+getObj :: (a,SourcePos) -> a
+getObj (a,_) = a
