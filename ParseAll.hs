@@ -18,6 +18,8 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 -- To do: 1. the parameter type in the Type
 --        2. bodyElem list ... 
+--        3. var .. should we have a type var?
+--        4. for type variable, should parser keep ` in the name ?
 
 
 
@@ -28,20 +30,21 @@ main = parseFromFile parser "sample.pl"
 
 
 -- | separate and end by peroid 
-definedTypes :: Parser [(DefinedType, SourcePos)]
-definedTypes = endBy definedType period
+definedTypes :: Parser [(DefinedType, Line)]
+definedTypes = endBy definedType period 
 
 -- typedecl :: Parser [Dec]
 -- typedecl = endBy typedecl' period
 
-typedecls :: Parser [(Dec,SourcePos)]
-typedecls = do 
+typedecls :: Parser [(Dec,Line)]
+typedecls = option ([])$ do 
     reservedword "decl" 
-    list <- many typedecl
-    reservedword "end"
+    list <- many typedecl 
+    -- list <- endBy typedecl period
+    reservedword "end" <?> "declaration should enclosed between 'decl' and 'end' "
     return list 
 
-rules :: Parser [(Rule,SourcePos)]
+rules :: Parser [(Rule,Line)]
 rules = endBy rule period
 
 parser' :: Parser Prolog 

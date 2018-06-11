@@ -18,11 +18,11 @@ import Parser_Types
 -- * Parser for Prolog Program
 --
 
-rule  :: Parser (Rule,SourcePos)
+rule  :: Parser (Rule,Line)
 rule = do 
     rl  <- rule'
     pos <- getPosition
-    return (rl,pos)
+    return (rl,unPos (sourceLine pos))
 
 -- | parse a single rule 
 rule' :: Parser Rule 
@@ -42,22 +42,20 @@ rule' = do
 -- | parse the argument Name 
 argument :: Parser Argument
 argument = try optAExpr
+   <|> try (Func <$> predFunA)
    <|> try (Atom <$> atomName)
    <|> try (LitI <$> integer)
    <|> try (LitS <$> stringName)
    <|> try listNormal
    <|> try listVar
-   <|> try (Var <$> varName)
-   <|> try (Func <$> predFunA)
-   
-
+   <|> (Var <$> varName)
 
 predFunA :: Parser PredFunA 
 predFunA = do 
     fn <- funcName 
     void (symbol "(")
     arglist <- argumentList 
-    void (symbol ")")
+    void (symbol ")") 
     return (fn,arglist)
 
 argumentList :: Parser [Argument]
@@ -119,7 +117,7 @@ bodyElem =   try isClause
 -- | Parse isClause such as Y is 4*3
 isClause :: Parser BodyElem
 isClause = do 
-  left <- argument 
+  left <- argument  
   reservedword "is" 
   right <- argument
   return $ Is left right

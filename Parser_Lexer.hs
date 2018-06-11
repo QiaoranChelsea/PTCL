@@ -60,7 +60,7 @@ reservedword w = lexeme (string w *> notFollowedBy alphaNumChar)
 
 -- | list of reserved words in scope of type
 reservedwords :: [String]
-reservedwords = ["atom","int", "list", "stirng", "data", "type", "decl", "end", "is"]
+reservedwords = ["atom","int", "list", "stirng", "data", "type", "decl", "end", "is", "var"]
 
 
 -- | 
@@ -98,7 +98,7 @@ identifierLower = (lexeme . try) (p >>= check)
 typeVarName :: Parser TypeName 
 typeVarName = (lexeme . try) (p >>= check >>= checkCapital)
   where
-    p       = (:) <$> char '_' <*> many lowerChar
+    p       = (:) <$> char '`' <*> many lowerChar
     check x = if x `elem` reservedwords
                 then fail $ "type keyword " ++ show x ++ " cannot be an identifier"
                 else return x

@@ -27,14 +27,15 @@ buildinType = TAtom <$ reservedword "atom"
     <|> TDef <$> identifier
 
 
+
 --
 -- Parser for User Defined Type
 --
-definedType :: Parser (DefinedType,SourcePos)
+definedType :: Parser (DefinedType,Line)
 definedType = do 
     dt  <- definedType'
     pos <- getPosition
-    return (dt,pos)
+    return (dt,unPos (sourceLine pos))
 
 -- | parser for user defined type
 definedType' :: Parser DefinedType
@@ -104,11 +105,11 @@ typeList = buildinType  `sepBy` comma
 --
 -- * Parser for Type Declaration
 --
-typedecl :: Parser (Dec,SourcePos)
+typedecl :: Parser (Dec,Line)
 typedecl = do 
     td  <- typedecl'
     pos <- getPosition
-    return (td,pos)
+    return (td,unPos (sourceLine pos) )
 
 -- | parse the single declaration
 typedecl' :: Parser Dec
@@ -122,7 +123,7 @@ predTypeDecl =  do
     void (symbol "(") 
     tplist <- typeList  
     void (symbol ")")
-    void (symbol ".")
+    void (symbol ".") <?> "type declaration should end with '.' "
     return (PredD (pn, tplist))
 
 -- | parse the type declaration of functor which has the return type
@@ -135,7 +136,7 @@ funcTypeDecl = do
     void (symbol ")")
     void (symbol "->")
     rtlist <- buildinType
-    void (symbol ".")
+    void (symbol ".") <?> "type declaration should end with '.' "
     return (FuncD (pn, tplist,rtlist))
 
 

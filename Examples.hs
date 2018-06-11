@@ -170,7 +170,7 @@ d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (OperA Mult  (Var "X")  (L
 t1:: Rule
 t1 = (Head ( "tree", [(Atom "leaf")] ) [])
 
--- tree((node(3 , Leaf, Leaf) )).
+-- tree(node(3 , Leaf, Leaf)).
 t2:: Rule
 t2 = Head ("tree", [ (Func ("node", [ (LitI 3), (Atom "leaf"), (Atom "leaf")]))  ]  ) []
 
