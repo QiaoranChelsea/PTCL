@@ -3,7 +3,6 @@ module Types where
 import Text.Megaparsec.Pos
 
 -- | Types 
-
 data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
     deriving(Show, Eq)
 
@@ -16,7 +15,6 @@ type PredicateT = (PredName, [Type])
 type FunctorT =   (FuncName,[Type],Type)
 data Dec = PredD PredicateT | FuncD FunctorT
     deriving(Show)
-
 
 -- | Names
 type VarName = String -- upper case
@@ -59,7 +57,6 @@ data Argument = Atom AtomName
               | Func PredFunA 
               | OperA OptA Argument Argument 
     deriving(Show)
- 
      
 -- | Body is a list of BodyElem 
 type Body = [BodyElem]
