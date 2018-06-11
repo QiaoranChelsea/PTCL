@@ -188,48 +188,48 @@ l2 = (Head ( "listLength", [ (List ((Var "_"):[(Var "T")])),  (Var "Total") ]) [
 
 
 typsdef :: TypeDef
-typsdef = [(treeType, SourcePos {sourceName = "sample.pl", sourceLine = mkPos 1, sourceColumn = mkPos 1})
-          ,(treeType2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 2, sourceColumn = mkPos 1})
-          ,( nameType, SourcePos {sourceName = "sample.pl", sourceLine = mkPos 3, sourceColumn = mkPos 1})]
+typsdef = [(treeType,  1)
+          ,(treeType2, 2)
+          ,( nameType,  3)]
 
 
 typdec :: TypeDic
-typdec = [ (d1_1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 4, sourceColumn = mkPos 1})
-         , (d1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 5, sourceColumn = mkPos 1})
-         , (d2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 6, sourceColumn = mkPos 1})
-         , (d3,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 7, sourceColumn = mkPos 1})
-         , (d4,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 8, sourceColumn = mkPos 1})
-         , (d5,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 9, sourceColumn = mkPos 1})
-         , (d6,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 10, sourceColumn = mkPos 1})
-         , (d7,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 11, sourceColumn = mkPos 1})
-         , (d8,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 12, sourceColumn = mkPos 1})
-         , (d9,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 13, sourceColumn = mkPos 1})]
+typdec = [ (d1_1, 4)
+         , (d1, 5)
+         , (d2, 6)
+         , (d3, 7)
+         , (d4, 8)
+         , (d5, 9)
+         , (d6, 10)
+         , (d7, 11)
+         , (d8, 12)
+         , (d9, 13)]
 
 prolog :: Prog
-prolog = [ (v1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 14, sourceColumn = mkPos 1})
-         , (v2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 15, sourceColumn = mkPos 1})
-         , (v3,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 16, sourceColumn = mkPos 1})
-         , (v3',SourcePos {sourceName = "sample.pl", sourceLine = mkPos 17, sourceColumn = mkPos 1})
-         , (v4,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 18, sourceColumn = mkPos 1})
-         , (v5,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 19, sourceColumn = mkPos 1})
-         , (v6,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 20, sourceColumn = mkPos 1})
-         , (v7,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 21, sourceColumn = mkPos 1})
-         , (f1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 22, sourceColumn = mkPos 1})
-         , (f2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 23, sourceColumn = mkPos 1})
-         , (f3,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 24, sourceColumn = mkPos 1})
-         , (g1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 25, sourceColumn = mkPos 1})
-         , (g2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 26, sourceColumn = mkPos 1})
-         , (e,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 27, sourceColumn = mkPos 1})
-         , (d,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 28, sourceColumn = mkPos 1})
-         , (t1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 29, sourceColumn = mkPos 1})
-         , (t2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 30, sourceColumn = mkPos 1})
-         , (t3,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 31, sourceColumn = mkPos 1})
-         , (i1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 32, sourceColumn = mkPos 1})
-         , (t2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 33, sourceColumn = mkPos 1})
-         , (s1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 34, sourceColumn = mkPos 1})
-         , (s2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 35, sourceColumn = mkPos 1})
-         , (l1,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 36, sourceColumn = mkPos 1})
-         , (l2,SourcePos {sourceName = "sample.pl", sourceLine = mkPos 37, sourceColumn = mkPos 1})]
+prolog = [ (v1, 14)
+         , (v2, 15)
+         , (v3, 16)
+         , (v3', 17)
+         , (v4, 18)
+         , (v5, 19)
+         , (v6, 20)
+         , (v7, 21)
+         , (f1, 22)
+         , (f2, 23)
+         , (f3, 24)
+         , (g1, 25)
+         , (g2, 26)
+         , (e, 27)
+         , (d, 28)
+         , (t1, 29)
+         , (t2, 30)
+         , (t3, 31)
+         , (i1, 32)
+         , (t2, 33)
+         , (s1, 34)
+         , (s2, 35)
+         , (l1, 36)
+         , (l2, 37)]
 
 
 domain :: Domain

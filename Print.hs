@@ -34,7 +34,7 @@ printMaybeWaring  Nothing = "No warnings\n"
 printMaybeWaring (Just w ) =  "** Warnings **\n" ++ printGList w printWar ""
 
 printWar :: War -> String
-printWar (W pos w) = "Line " ++ pos ++ ": " ++  printWaring w
+printWar (W pos w) = "Line " ++ show pos ++ ": " ++  printWaring w
 
 printWaring :: Warining -> String
 printWaring (NonDecl p _ ) = "- Non-Declared: "  ++ printPredFunVal p ++ "\n"
@@ -46,7 +46,7 @@ printMaybeErr Nothing = "No errors\n"
 printMaybeErr (Just e) = "** Errors **\n\n" ++ printGList e printErr ""
 
 printErr :: Err -> String
-printErr (E pos e) = "Line " ++ pos ++ ": " ++  printError e
+printErr (E pos e) = "Line " ++ show pos ++ ": " ++  printError e
 
 printError :: Error -> String
 printError  (ArgType d p m ) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p m ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
