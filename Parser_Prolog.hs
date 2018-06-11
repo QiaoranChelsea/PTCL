@@ -18,11 +18,11 @@ import Parser_Types
 -- * Parser for Prolog Program
 --
 
-rule  :: Parser (Rule,SourcePos)
+rule  :: Parser (Rule,Line)
 rule = do 
     rl  <- rule'
     pos <- getPosition
-    return (rl,pos)
+    return (rl,unPos (sourceLine pos))
 
 -- | parse a single rule 
 rule' :: Parser Rule 

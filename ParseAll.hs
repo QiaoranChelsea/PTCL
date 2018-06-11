@@ -28,20 +28,21 @@ main = parseFromFile parser "sample.pl"
 
 
 -- | separate and end by peroid 
-definedTypes :: Parser [(DefinedType, SourcePos)]
+definedTypes :: Parser [(DefinedType, Line)]
 definedTypes = endBy definedType period
 
 -- typedecl :: Parser [Dec]
 -- typedecl = endBy typedecl' period
 
-typedecls :: Parser [(Dec,SourcePos)]
-typedecls = do 
+typedecls :: Parser [(Dec,Line)]
+typedecls = option ([])$ do 
     reservedword "decl" 
-    list <- many typedecl
+    -- list <- many typedecl
+    list <- endBy typedecl period
     reservedword "end"
     return list 
 
-rules :: Parser [(Rule,SourcePos)]
+rules :: Parser [(Rule,Line)]
 rules = endBy rule period
 
 parser' :: Parser Prolog 
