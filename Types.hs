@@ -2,15 +2,17 @@ module Types where
        
 import Text.Megaparsec.Pos
 
+
 -- | Types 
 data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
     deriving(Show, Eq)
 
+type Line = Int 
 --
 -- * Basic Object of Type Declaration  
 --
 -- | A list of the type declaration 
-type TypeDic = [(Dec,SourcePos)]
+type TypeDic = [(Dec,Line)]
 type PredicateT = (PredName, [Type])
 type FunctorT =   (FuncName,[Type],Type)
 data Dec = PredD PredicateT | FuncD FunctorT
@@ -25,7 +27,7 @@ type FuncName = String -- lower case
 -- 
 -- * User defined type
 -- 
-type TypeDef = [(DefinedType,SourcePos)]
+type TypeDef = [(DefinedType,Line)]
 type TypeName = String -- upper case
 type TypeVar = String -- lower case start with '
 
@@ -41,7 +43,7 @@ data DefinedType = TypeT TypeName Type
 -- 
 
 -- | A set of Prolog Predicate 
-type Prog = [(Rule,SourcePos)] 
+type Prog = [(Rule,Line)] 
 
 type PredFunA = (String, [Argument])
 
@@ -83,7 +85,7 @@ data Prolog = PL (TypeDef, TypeDic, Prog)
     deriving (Show)
 
 
--- newtype SourcePos  = SourcePos {sourceName   :: FilePath  -- Name of source file
+-- newtype Line  = Line {sourceName   :: FilePath  -- Name of source file
 --                                 sourceLine   :: !Pos      -- Line number
 --                                 sourceColumn :: !Pos}     -- Column number 
      
