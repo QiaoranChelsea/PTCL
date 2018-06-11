@@ -9,8 +9,6 @@ import TypeChecker
 printReport :: Report -> String
 printReport (R err war) = printMaybeErr err ++ printMaybeWaring war
 
-
-
 numArDec :: Dec -> Int
 numArDec (PredD (_,b)) = size b
 numArDec (FuncD (_,b,_)) = size b
@@ -21,13 +19,6 @@ numArPred (_, b) = size b
 size :: [a] -> Int
 size [] = 0
 size (_:xs) = 1 + size xs
-
--- --
--- -- -- p(X,Y) :- d(X,Y); d(Y,X)
---
-
-
-
 
 printMaybeWaring :: Maybe [War] -> String
 printMaybeWaring  Nothing = "No warnings\n"
@@ -43,7 +34,7 @@ printWaring (Conflict t1 t2)  = "- conflicting argument type: " ++ printPredFunV
 
 printMaybeErr :: Maybe [Err] -> String
 printMaybeErr Nothing = "No errors\n"
-printMaybeErr (Just e) = "** Errors **\n\n" ++ printGList e printErr ""
+printMaybeErr (Just e) = "** Errors **\n" ++ printGList e printErr ""
 
 printErr :: Err -> String
 printErr (E pos e) = "Line " ++ show pos ++ ": " ++  printError e
@@ -52,16 +43,17 @@ printError :: Error -> String
 printError  (ArgType d p m ) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p m ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
 printError  (IncArrit d p m ) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p m ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
 printError  (MultDef t1 t2 ) = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at: " ++ printTypeDef t1 ++ " , " ++ printTypeDef t2 ++ "\n\n"
-printError  (MultDec t1 t2) = "- Multiple declaration of " ++ decName t1 ++ "\n- Declared at " ++ printDec t1 ++ " , " ++ printDec t2 ++ "\n\n"
+printError  (MultDec t1 t2) = "- Multiple declarations of " ++ decName t1 ++ "\n- Declared at " ++ printDec t1 ++ " , " ++ printDec t2 ++ "\n\n"
 printError  (MissIs b ) = "Misuse of \"is\": expecting Number in the left hand side of \"is\" in " ++  printBodyEle b ++ "\n\n"
+printError  (UnknowType n d) = "Unknow User-Defined-Type \"" ++ n ++ "\" \n- Declared at: " ++ printDec d ++ "\n\n"
+printError  (EqType b t1 t2 m) = "The types \"" ++ printType t1 ++ "\" and  \"" ++ printType t2 ++ "\" do not match \n- In: " ++ printBodyEle b ++ "\n\n"
+printError  (VariableType b t m) = typeVarErr b t m
 
- -- in "5+3 is 8"
-printError  (VariableType b t m) = "VariableType\n\n"
-
-
-
-
-
+typeVarErr ::  BodyElem -> Type -> VarMap -> String
+typeVarErr b t'([],_)  = ""
+typeVarErr b t' (((v,t):xs),s)= if t == t' 
+                            then typeVarErr b t' (xs,s) 
+                            else "- Couldnt match expected type " ++ printType t' ++ " with " ++ v ++ ":" ++ printType t  ++ "\nIn " ++ printBodyEle b ++ "\n\n" 
 
 printDec ::  Dec -> String
 printDec (PredD (n, l) ) = n ++ "(" ++ printGList l printType "," ++ ")"
@@ -140,7 +132,7 @@ printArgType (Atom a ) _  = "atom"
 printArgType (LitI a ) _ =  "int"
 printArgType (LitS a ) _ = "string"
 printArgType (List a ) _ = "list"
-printArgType (Var a ) m = case findVar a m of
+printArgType (Var a ) (m,s) = case findVar a m of
                             Nothing -> "var"
                             Just x ->  printType (varType x)
 printArgType (Func  a ) m = printPredFuncM printArgType a m
@@ -156,9 +148,6 @@ printBodyEle (Pred p ) = printPredFunVal p
 printBodyEle (Is p1 p2) = printArgVal p1 ++ " is " ++ printArgVal p2
 printBodyEle (OperC op p1 p2) = printArgVal p1 ++ printOptC op ++ printArgVal p2
 printBodyEle (And  b1 b2) = printBodyEle b1 ++ " , " ++ printBodyEle b2
-
-
-
 
 
 

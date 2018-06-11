@@ -15,7 +15,9 @@ chcker (typsdef, typdec, prolog ) = R  (errors typsdef typdec prolog  ) (warning
 
 -- combine errors from  duplicateDec and type and arrities errors
 errors :: TypeDef -> TypeDic -> Prog -> Maybe [Err]
-errors f d p = let empty = [] in combineTwoMaybe (duplicateDef f ,combineTwoMaybe (duplicateDec d, typeErrs p d f))
+errors f d p = let empty = [] in combineTwoMaybe (unknowType d f , combineTwoMaybe (duplicateDef f ,combineTwoMaybe (duplicateDec d, typeErrs p d f)))
+
+
 
 
 -- takes the list of non declared predicates and find the conflict in them

@@ -12,16 +12,23 @@ data Warining = NonDecl PredFunA Bool
                 | Conflict PredFunA PredFunA
 
 data Error = ArgType Dec PredFunA VarMap
-            | VariableType BodyElem Type VarMap
-            | EqType BodyElem VarMap
             | IncArrit Dec PredFunA VarMap
-            | MultDef DefinedType DefinedType
-            | MissIs  BodyElem
-            | MultDec Dec Dec
 
+            | VariableType BodyElem Type VarMap
+            | EqType BodyElem Type Type VarMap
+            | MissIs  BodyElem
+            
+            | UnknowType TypeName Dec            
+            | MultDec Dec Dec
+            | MultDef DefinedType DefinedType
+            
+type VarMap = (VarTypes,Subsitutions)
 
 type VarType = (VarName,Type)
-type VarMap = [VarType]
+type VarTypes = [VarType]
+
+type Substitute = (TypeVar,Type)
+type Subsitutions = [Substitute]
 
 data Err = E Line Error
 data War = W Line Warining
@@ -54,7 +61,11 @@ definedTypeName :: DefinedType -> TypeName
 definedTypeName (TypeT n _) = n
 definedTypeName (DataT n _ _) = n
 
-findVar ::  VarName -> VarMap ->  Maybe VarType
+addToVarMap :: VarType -> VarMap -> VarMap
+addToVarMap vt (m,s) = (vt:m, s)
+
+
+findVar ::  VarName -> VarTypes ->  Maybe VarType
 findVar _ [] = Nothing
 findVar s (x:xs) = if (varName x) == s then Just x else findVar s xs
 

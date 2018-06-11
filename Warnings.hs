@@ -4,16 +4,16 @@ import Text.Megaparsec.Pos
 import ErrorWarTypes
 import Types
 
-checkBody :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> Line -> TypeDic -> TypeDef ->  Maybe [a]
-checkBody _ [] _ d def = Nothing
-checkBody f (b:bs) pos d def = combineTwoMaybe (checkBodyEle f b pos d def , checkBody f bs pos d def )
+checkBodyWar :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> [BodyElem] -> Line -> TypeDic -> TypeDef ->  Maybe [a]
+checkBodyWar _ [] _ d def = Nothing
+checkBodyWar f (b:bs) pos d def = combineTwoMaybe (checkBodyEleWar f b pos d def , checkBodyWar f bs pos d def )
 
-checkBodyEle :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem -> Line->  TypeDic -> TypeDef ->  Maybe [a]
-checkBodyEle f (Pred p ) pos d def = f p pos d def
-checkBodyEle f (And b1 b2) pos d def = combineTwoMaybe (checkBodyEle f b1 pos d def , checkBodyEle f b2 pos d def)
-checkBodyEle _ _ _ _ _ = Nothing
+checkBodyEleWar :: (PredFunA -> Line -> TypeDic -> TypeDef -> Maybe [a]) -> BodyElem -> Line->  TypeDic -> TypeDef ->  Maybe [a]
+checkBodyEleWar f (Pred p ) pos d def = f p pos d def
+checkBodyEleWar f (And b1 b2) pos d def = combineTwoMaybe (checkBodyEleWar f b1 pos d def , checkBodyEleWar f b2 pos d def)
+checkBodyEleWar _ _ _ _ _ = Nothing
 
--- ----------------------------------------------------------nonDec------------------------------------------------------------------------
+----------------------------------------------------------nonDec------------------------------------------------------------------------
 
 -- find non declared predicates
 nonDecWarning :: Prog -> TypeDic -> TypeDef -> Maybe [War]
@@ -22,16 +22,16 @@ nonDecWarning (p:ps) d f = combineTwoMaybe (nonDecWarning_ p d f, nonDecWarning 
 
 -- find non declared predicates in rule
 nonDecWarning_ :: (Rule,Line) -> TypeDic -> TypeDef -> Maybe [War]
-nonDecWarning_ ((Head p b ),pos) d f = combineTwoMaybe (doesExist p pos d f , checkBody doesExist b  pos d f )
+nonDecWarning_ ((Head p b ),pos) d f = combineTwoMaybe (doesExist p pos d f , checkBodyWar doesExist b  pos d f )
 
 -- find if this pred exist in dec list
 doesExist :: PredFunA -> Line -> TypeDic -> TypeDef  -> Maybe [War]
 doesExist p pos [] _  =  Just [W pos (NonDecl p False)]
 doesExist p@(n, _ ) pos ((d,_):ds) f = if n == decName d then Nothing
                                             else doesExist p pos ds f
-
+                                            
 -------------------------------------------------------Conflict---------------------------------------------------------------------------
-
+                                            
 conflict :: [War] ->  [War] -> Maybe [War]
 conflict  [] ls = Just ls
 conflict (x:xs) ls = case doesConflict x ls of
@@ -94,3 +94,44 @@ unifyList (List _ ) = True
 unifyList (Var _ ) = True
 unifyList (Func _ ) = True
 unifyList _  = False
+
+
+
+-- checkBody :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [a])) -> [BodyElem] -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [a])
+-- checkBody _ [] _ d def m = (m,Nothing)
+-- checkBody f (b:bs) pos d def m =
+--     let (m',r') = checkBodyEle f b pos d def m in
+--     let (m'',r'') = checkBody f bs pos d def m' in
+--      (m'',combineTwoMaybe (r' , r''))
+--
+-- checkBodyEle :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [a])) -> BodyElem -> Line->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [a])
+-- checkBodyEle f (Pred p ) pos d def m = f p pos d def m
+-- checkBodyEle f (And b1 b2) pos d def m =
+--     let (m',r') = checkBodyEle f b1 pos d def m in
+--     let (m'',r'') = checkBodyEle f b2 pos d def m' in
+--      (m'',combineTwoMaybe (r' , r''))
+-- checkBodyEle _ _ _ _ _ m = (m,Nothing)
+--
+--
+-- -- ----------------------------------------------------------nonDec------------------------------------------------------------------------
+--
+-- -- find non declared predicates
+-- nonDecWarning :: Prog -> TypeDic -> TypeDef -> Maybe [War]
+-- nonDecWarning [] _ _ = Nothing
+-- nonDecWarning (p:ps) d f = combineTwoMaybe (nonDecWarning_ p d f, nonDecWarning ps d f)
+--
+-- -- find non declared predicates in rule
+-- nonDecWarning_ :: (Rule,Line) -> TypeDic -> TypeDef -> Maybe [War]
+-- nonDecWarning_ ((Head p b ),pos) d f =
+--     let (m',r') = doesExist p pos d f [] in
+--     let (_,r'') = checkBody doesExist b  pos d f m' in
+--      combineTwoMaybe (r' , r'')
+--
+--
+-- -- find if this pred exist in dec list
+-- doesExist :: PredFunA -> Line -> TypeDic -> TypeDef  -> VarMap -> (VarMap, Maybe [War])
+-- doesExist p pos [] _  m =  (m, Just [W pos (NonDecl p False)])
+-- doesExist p@(n, _ ) pos ((d,_):ds) f m = if n == decName d then (m,Nothing)
+--                                             else doesExist p pos ds f m
+
+

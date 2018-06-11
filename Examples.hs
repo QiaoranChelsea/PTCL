@@ -68,10 +68,23 @@ d7 :: Dec
 d7 = PredD ("sumTree", [TDef "Tree", TInt])
 
 d8 :: Dec
-d8 = PredD ("listLength", [TDef "MyList", TInt])
+d8 = PredD ("listLength", [TDef "MyLi", TInt]) -- error
+-- d8 = PredD ("listLength", [TDef "MyList", TInt])
+
 
 d9 :: Dec
 d9 = PredD ("doubleAge", [TAtom,TInt])
+
+d10 :: Dec
+d10 = PredD ("eq", [TVar "a",TVar "a"])
+
+d11 :: Dec
+d11 = PredD ("eq6", [TInt])
+
+d12 :: Dec
+d12 = PredD ("isEqual", [TInt, TAtom])
+
+
 
 --
 -- %%%% valid program
@@ -137,12 +150,21 @@ g2 = (Head ( "married", [ (Var "X"),  (Var "Y" )]) [Pred ( "_married", [ (Var "Y
 e :: Rule
 e = (Head ( "eq", [ (Var "X"), ( Var "Y" )]) [OperC Eq (Var "X") (Var "Y")])
 
+e' :: Rule
+e' = (Head ( "eq6", [( Var "X" )]) [(Pred ( "eq", [(LitI 6),(Var "X")]) )])
+
+e'' :: Rule
+e'' = (Head ( "ege6", [( Var "X" )]) [ And (Pred ( "age", [(Var "X"),(Var "Y")]) ) (Pred ( "eq", [(Var "X"), (LitI 6)] ))])
+
+e2 :: Rule
+e2 = (Head ( "isEqual", [( Var "X" ),( Var "Y" )]) [OperC Eq (Var "X") (Var "Y")])
+
+
 -- double(X, Y) :- Y is X * 2.
 d :: Rule
 d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (OperA Mult  (Var "X")  (LitI 2)) (Var "Y") ])
 
 -- d = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (Var "Y") (OperA Mult  (Var "X")  (LitI 2)) ])
-
 
 -- tree(leaf).
 t1:: Rule
@@ -203,33 +225,44 @@ typdec = [ (d1_1, 4)
          , (d6, 10)
          , (d7, 11)
          , (d8, 12)
-         , (d9, 13)]
+         , (d9, 13)
+         , (d10, 14)
+         , (d11, 15)
+         , (d12, 16)
+         
+         
+         ]
 
 prolog :: Prog
-prolog = [ (v1, 14)
-         , (v2, 15)
-         , (v3, 16)
-         , (v3', 17)
-         , (v4, 18)
-         , (v5, 19)
-         , (v6, 20)
-         , (v7, 21)
-         , (f1, 22)
-         , (f2, 23)
-         , (f3, 24)
-         , (g1, 25)
-         , (g2, 26)
-         , (e, 27)
-         , (d, 28)
-         , (t1, 29)
-         , (t2, 30)
-         , (t3, 31)
-         , (i1, 32)
-         , (t2, 33)
-         , (s1, 34)
-         , (s2, 35)
-         , (l1, 36)
-         , (l2, 37)]
+prolog = [ (v1, 20)
+         , (v2, 21)
+         , (v3, 22)
+         , (v3', 23)
+         , (v4, 24)
+         , (v5, 25)
+         , (v6, 26)
+         , (v7, 27)
+         , (f1, 28)
+         , (f2, 29)
+         , (f3, 30)
+         , (g1, 31)
+         , (g2, 32)
+         , (e, 33)
+         , (d, 34)
+         , (t1, 35)
+         , (t2, 36)
+         , (t3, 37)
+         , (i1, 38)
+         , (t2, 39)
+         , (s1, 40)
+         , (s2, 41)
+         , (l1, 42)
+         , (l2, 43)
+         ,(e',44)
+         ,(e'',45)
+         ,(e2,46)
+         
+         ]
 
 
 domain :: Domain
@@ -238,4 +271,4 @@ domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
 v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
 --
 --
--- k = putStrLn $ typeErrP v7 typdec typsdef
+k = putStrLn $ typeErrP (e',44) typdec typsdef
