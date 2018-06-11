@@ -9,9 +9,6 @@ import TypeChecker
 printReport :: Report -> String
 printReport (R err war) = printMaybeErr err ++ printMaybeWaring war
 
-printMaybeErr :: Maybe [Error] -> String
-printMaybeErr Nothing = "No errors\n"
-printMaybeErr (Just e) = "** Errors **\n\n" ++ printGList e printError ""
 
 
 numArDec :: Dec -> Int
@@ -28,6 +25,29 @@ size (_:xs) = 1 + size xs
 -- --
 -- -- -- p(X,Y) :- d(X,Y); d(Y,X)
 --
+
+
+
+
+printMaybeWaring :: Maybe [War] -> String
+printMaybeWaring  Nothing = "No warnings\n"
+printMaybeWaring (Just w ) =  "** Warnings **\n" ++ printGList w printWar ""
+
+printWar :: War -> String
+printWar (W pos w) = "Line " ++ pos ++ ": " ++  printWaring w
+
+printWaring :: Warining -> String
+printWaring (NonDecl p _ ) = "- Non-Declared: "  ++ printPredFunVal p ++ "\n"
+printWaring (Conflict t1 t2)  = "- conflicting argument type: " ++ printPredFunVal t1  ++ " and this " ++ printPredFunVal t2 ++ "\n"
+
+
+printMaybeErr :: Maybe [Err] -> String
+printMaybeErr Nothing = "No errors\n"
+printMaybeErr (Just e) = "** Errors **\n\n" ++ printGList e printErr ""
+
+printErr :: Err -> String
+printErr (E pos e) = "Line " ++ pos ++ ": " ++  printError e
+
 printError :: Error -> String
 printError  (ArgType d p m ) =  "- Couldnt match expected type "++  printDec d ++ " with " ++ printPredFunType p m ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
 printError  (IncArrit d p m ) = "- The predicate for "++  printDec d ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p m ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n\n"
@@ -40,14 +60,7 @@ printError  (VariableType b t m) = "VariableType\n\n"
 
 
 
-printMaybeWaring :: Maybe [Warining] -> String
-printMaybeWaring  Nothing = "No warnings\n"
-printMaybeWaring (Just w ) =  "** Warnings **\n" ++ printGList w printWaring ""
 
-
-printWaring :: Warining -> String
-printWaring (NonDecl p _ ) = "- Non-Declared: "  ++ printPredFunVal p ++ "\n"
-printWaring (Conflict t1 t2)  = "- conflicting argument type: " ++ printPredFunVal t1  ++ " and this " ++ printPredFunVal t2 ++ "\n"
 
 
 printDec ::  Dec -> String
@@ -88,7 +101,7 @@ printPredFunVal :: PredFunA -> String
 printPredFunVal  p = printPredFunc printArgVal p
 
 printPredFunType :: PredFunA -> VarMap -> String
-printPredFunType  p m =  printPredFuncM printArgType p m 
+printPredFunType  p m =  printPredFuncM printArgType p m
 
 printPredFuncM ::  (Argument -> VarMap -> String) -> PredFunA -> VarMap -> String
 printPredFuncM f ( n, ts) m = n ++ "(" ++ (printGListM ts f "," m)++ ")"
@@ -119,7 +132,7 @@ printArgVal (LitS a ) = show a
 printArgVal (List a ) = "[" ++ printGList a printArgVal " , "  ++ "]"
 printArgVal (Var a ) = show a
 printArgVal (Func  a ) = printPredFunc printArgVal a
-printArgVal (OperA  o a1 a2 ) = printArgVal a1 ++ printOptA o ++ printArgVal a2 
+printArgVal (OperA  o a1 a2 ) = printArgVal a1 ++ printOptA o ++ printArgVal a2
 
 
 printArgType :: Argument -> VarMap -> String
@@ -129,12 +142,9 @@ printArgType (LitS a ) _ = "string"
 printArgType (List a ) _ = "list"
 printArgType (Var a ) m = case findVar a m of
                             Nothing -> "var"
-                            Just x ->  printType (varType x) 
+                            Just x ->  printType (varType x)
 printArgType (Func  a ) m = printPredFuncM printArgType a m
-printArgType (OperA  o a1 a2 ) _ = "int" 
-
-
-
+printArgType (OperA  o a1 a2 ) _ = "int"
 
 printBodyElems ::  String -> [BodyElem]-> String
 printBodyElems _ [] = ""

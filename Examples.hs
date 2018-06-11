@@ -3,10 +3,10 @@ module Examples where
 
 import Types
 import Text.Megaparsec.Pos
--- import TypeChecker
--- import ErrorWarTypes
--- import Print
--- import Errors
+import TypeChecker
+import ErrorWarTypes
+import Print
+import Errors
 
 
 --
@@ -236,6 +236,6 @@ domain :: Domain
 domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
 
 v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
-
-
-k = putStrLn $ typeErrP v7 typdec typsdef
+--
+--
+-- k = putStrLn $ typeErrP v7 typdec typsdef
