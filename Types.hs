@@ -29,7 +29,7 @@ type FuncName = String -- lower case
 -- 
 type TypeDef = [(DefinedType,Line)]
 type TypeName = String -- upper case
-type TypeVar = String -- lower case start with '
+type TypeVar = String -- lower case start with _
 
 type ConstructorName = String -- lower case
 type Cons = (ConstructorName,[Type])

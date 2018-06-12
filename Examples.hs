@@ -14,19 +14,19 @@ import Errors
 
 -- | Define types
 
--- data tree _a = node(_a,tree _a ,tree _a ) | leaf
+-- data tree _a = node(_a,tree _a ,tree _a ) | leaf.
 def1 :: DefinedType
 def1 = ( DataT "tree" ["_a"] [("node", [(TVar "_a"), TDef "tree" ["_a"] , TDef "tree" ["_a"] ]),("leaf", []) ])
 
--- type myList = list
+-- type myList = list.
 def2 :: DefinedType
 def2 = ( TypeT "myList" TList )
 
--- data tree = node(string,tree ,tree ) | leaf
+-- data tree = node(string,tree ,tree ) | leaf.
 def3 :: DefinedType
 def3 = ( DataT "tree" [][("node", [TString, TDef "tree" [] , TDef "tree" [] ]),("leaf", []) ])
 
--- data treeAB _a _b = node(_a, treeAB _a _b, treeAB _a _b) | leaf _b
+-- data treeAB _a _b = node(_a, treeAB _a _b, treeAB _a _b) | leaf(_b).
 def4 :: DefinedType
 def4 = ( DataT "treeAB" ["_a", "_b"][("nodeAB", [(TVar "_a"), TDef "treeAB" ["_a", "_b"] , TDef "treeAB" ["_a", "_b"] ]),("leafAB", [TVar "_b"]) ])
 
@@ -78,7 +78,7 @@ d10 = PredD ("eq", [TVar "_a",TVar "_a"])
 d11 :: Dec
 d11 = PredD ("eq6", [TInt])
 
--- isEqual(int, atom).
+-- decl isEqual(int, atom).
 d12 :: Dec
 d12 = PredD ("isEqual", [TInt, TAtom])
 
@@ -112,7 +112,7 @@ e2 = (Head ( "male", [ LitI 5]) [])
 e3 :: Rule
 e3 = (Head ( "male", [Atom "marge"]) [])
 
--- male(list).
+-- male([8]).
 e4 :: Rule
 e4 = (Head ( "male", [List [(LitI 8)]]) [])
 
@@ -306,4 +306,4 @@ domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
 v = putStrLn $ printReport (domain (typsdef, typdec, prolog )) typsdef prolog
 -- --
 -- --
--- k = putStrLn $ typeErrP (s3,44) typdec typsdef
+-- k = putStrLn $ typeErrP (e32,44) typdec typsdef
