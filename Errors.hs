@@ -19,8 +19,6 @@ checkBodyEleErr f (And b1 b2) pos d def m =
                                let (m'', r') =  checkBodyEleErr f b2 pos d def m' in
                                (m'',combineTwoMaybe (r, r'))
 
-
-
 ----------------------------------------------------------duplicateDef----------------------------------------------------------------------
 
 -- find deuplicated def's
@@ -38,7 +36,7 @@ checktypesList (x:xs) p def =  combineTwoMaybe ( checktype x p def ,checktypesLi
 
 
 checktype :: Type -> (Dec, Line) -> TypeDef -> Maybe[Err]
-checktype  (TDef n) (d, pos) def =  case findType n def of
+checktype  (TDef n _ ) (d, pos) def =  case findType n def of
                                     Nothing -> Just [E pos (UnknowType  n d )]
                                     _ -> Nothing
 checktype _ _ _ = Nothing
@@ -167,7 +165,7 @@ unifyArgT x y f m= case x of
                             (TInt )   ->  unifyLitI_ y m
                             (TString) ->  unifyLitS_ y m
                             (TList )  ->  unifyList_ y m
-                            (TDef n)  -> case findType n f of
+                            (TDef n _ )  -> case findType n f of
                                             Nothing -> (m, False)
                                             Just d' -> unifyDefinedType d' y f m
                             (TVar _)  -> unifyVar_ y x m
@@ -195,8 +193,7 @@ argumentType  (Var x )  m = let (m'@(m'',_), _) = unifyArgVar x (TVar tVar) m in
                             let  res =  findVar x m'' in
                             case res of 
                                 Nothing -> (m', Nothing)
-                                Just (_,vt) -> (m',Just vt)
-                            
+                                Just (_,vt) -> (m',Just vt)                            
 argumentType  (OperA _ l r ) m = 
                             let (m', l') = unifyLitI_ l m in
                             let (m'', r') = unifyLitI_ r m' in
