@@ -5,8 +5,10 @@ The Prolog Type Checking language (PTCL) checks that predicates in a Prolog prog
 
 
 To run the code
+
 $ ghci RunPTCL.hs
 
 To run the parser
+
 $ runPTCL "sample.pl"
 
