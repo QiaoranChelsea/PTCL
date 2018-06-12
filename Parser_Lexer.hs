@@ -89,7 +89,6 @@ identifierLower = (lexeme . try) (p >>= check)
                 then fail $ "keyword " ++ show x ++ " cannot be an identifier"
                 else return x
 
-
 --
 -- Names 
 -- 

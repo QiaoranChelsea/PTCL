@@ -15,26 +15,31 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
+import TypeChecker
+import ErrorWarTypes
+import Print
+import Errors
+import Examples
 
 -- To do: 1. the parameter type in the Type
 --        2. bodyElem list ... 
 --        3. var .. should we have a type var?
 --        4. for type variable, should parser keep ` in the name ?
-
-
+--        5. Domain analysis
 
 parseFromFile p file = runParser p file <$> readFile file
 
-main = parseFromFile parser "sample.pl"
 
+split :: (Either (ParseError Char Void) Prolog) -> String  
+split a@(Right (PL p )) = printReport (chcker p)
+split b@(Left err)      = show err  
 
+runPTCL file  = (split <$> parseFromFile parser file ) >>= putStrLn
 
 -- | separate and end by peroid 
 definedTypes :: Parser [(DefinedType, Line)]
 definedTypes = endBy definedType period 
 
--- typedecl :: Parser [Dec]
--- typedecl = endBy typedecl' period
 
 typedecls :: Parser [(Dec,Line)]
 typedecls = option ([])$ do 

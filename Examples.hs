@@ -9,6 +9,8 @@ import Print
 import Errors
 
 
+
+
 --
 -- * Examples
 --
@@ -265,10 +267,13 @@ prolog = [ (v1, 20)
          ]
 
 
-domain :: Domain
-domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
+-- domain :: Domain
+-- domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
 
-v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
---
---
-k = putStrLn $ typeErrP (e',44) typdec typsdef
+-- domain :: Either ParseError Prolog 
+-- domain (Right (PL p )) = chcker p 
+
+-- v = putStrLn $ printReport (domain (typsdef, typdec, prolog ))
+-- --
+-- --
+-- k = putStrLn $ typeErrP (e',44) typdec typsdef
