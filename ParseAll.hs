@@ -27,27 +27,30 @@ import Examples
 --        4. for type variable, should parser keep ` in the name ?
 --        5. Domain analysis
 
-parseFromFile p file = runParser p file <$> readFile file
+-- parseFromFile p file = runParser p file <$> readFile file
 
 
-split :: (Either (ParseError Char Void) Prolog) -> String  
-split a@(Right (PL p )) = printReport (chcker p)
-split b@(Left err)      = show err  
+-- split :: (Either (ParseError Char Void) Prolog) -> String  
+-- split a@(Right (PL p )) = printReport (chcker p)
+-- split b@(Left err)      = show err  
 
-runPTCL file  = (split <$> parseFromFile parser file ) >>= putStrLn
+-- runPTCL file  = (split <$> parseFromFile parser file ) >>= putStrLn
 
 -- | separate and end by peroid 
 definedTypes :: Parser [(DefinedType, Line)]
 definedTypes = endBy definedType period 
 
 
+-- typedecls :: Parser [(Dec,Line)]
+-- typedecls = option ([])$ do 
+--     reservedword "decl" 
+--     list <- many typedecl 
+--     -- list <- endBy typedecl period
+--     reservedword "end" <?> "declaration should enclosed between 'decl' and 'end' "
+--     return list 
+
 typedecls :: Parser [(Dec,Line)]
-typedecls = option ([])$ do 
-    reservedword "decl" 
-    list <- many typedecl 
-    -- list <- endBy typedecl period
-    reservedword "end" <?> "declaration should enclosed between 'decl' and 'end' "
-    return list 
+typedecls = endBy typedecl period
 
 rules :: Parser [(Rule,Line)]
 rules = endBy rule period

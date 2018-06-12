@@ -48,7 +48,7 @@ argument = try optAExpr
    <|> try (LitS <$> stringName)
    <|> try listNormal
    <|> try listVar
-   <|> (Var <$> varName)
+   <|> try (Var <$> varName)
 
 predFunA :: Parser PredFunA 
 predFunA = do 
@@ -99,6 +99,7 @@ optATerm :: Parser Argument
 optATerm = parens optAExpr
   <|> Var <$> varName 
   <|> LitI <$> integer
+  <|> LitS <$> stringName
 
 -- -- | parse a predicate / single fact
 -- predicateT :: Parser PredFunA
