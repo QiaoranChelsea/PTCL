@@ -1,49 +1,69 @@
-data tree = node(int,tree,tree) | leaf.
-type myList = list.
-
-decl
-female(atom).
-age(atom, int).
-married_(atom, atom).
-# married(var, var).
-# eq(var, var).
-tree(tree).
-isTree(tree).
-sumTree(tree, int ).
-listLength(myList, int).
-end 
-
-female(1).
-# female(jacki).
-# male(marge).
-
-# age(mona, 6).
-# age(jacki, 19).
-# age(marge,20).
-
-# doubleAge(A,T):-  age(Y,A) , T is A *2.
-
-# married_(abe,mona).
-# married_(clancy,jackie).
-# married_(homer,marge).
+data tree _a = node(_a,tree _a ,tree _a ) | leaf
+type myList = list
+data tree = node(string,tree ,tree ) | leaf
+data treeAB _a _b = node(_a, treeAB _a _b, treeAB _a _b) | leaf _b
 
 
-# married(X,Y) :- married_(X,Y).
-# married(X,Y) :- married_(Y,X).
+decl female(atom).
+decl female(string).
+decl age(atom,int).
+decl married_(atom, atom).
+decl married(atom, atom).
+decl tree(tree _a ).
+decl isTree(tree _a).
+decl sumTree(tree _a , int).
+decl listLength(myLi, int).
+decl eq(_a, _a).
+decl eq6(int).
+isEqual(int, atom).
+decl eq2(_a, _b).
+decl comTwo(_a, _b).
+decl formTree(_a, _b, treeAB _a _b).
+decl doubleAge(atom, int).
 
-# eq(X, Y) :- X = Y.
-# double(X, Y) :- Y is X * 2.
 
-# tree(leaf).
-# tree(node(3 , Leaf, Leaf) ).
-# tree(node(4, leaf, node(3,leaf, node(4,leaf, leaf)))).
+male(mona).
+male(5).
+male(marge).
+male(list).
 
-# isTree(leaf).
-# isTree(node(_, L, R)):- isTree(L),isTree(R).
+age(mona, 6).
+age(jacki, 19, 19).
+age(20,marge).
 
-# sumTree(leaf, 0 ).
-# sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + N2 + I.
+doubleAge(A,T):-  age(Y,A) , T is A *2.
 
-# listLength([], 0).
-# listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
+married_(abe,mona).
+married_(clancy,jackie).
+married_(homer,marge).
 
+married(X,Y) :- married_(X,Y).
+married(X,Y) :- married_(Y,X).
+
+eq(X, Y) :- X = Y.
+ege6(X) :- eq(6,X).
+ege6(X) :- age(X,Y), eq(X,6).
+ege6(X) :- age(X,Y), eq2(X,6).
+
+isEqual(X,Y) :- X = Y.
+
+comTwo(X,Y) :- X = 5 , age(X,Y).
+
+double(X, Y) :- X * 2 is Y.
+
+tree(leaf).
+tree(node(leaf , leaf, leaf)).
+tree(node(4, leaf, node(3,leaf(4), node(4,leaf, leaf)))).
+
+isTree(leaf).
+isTree(node(_, L, R)):- isTree(L),isTree(R).
+
+sumTree(0, leaf).
+sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, L ), T is N1 + I.
+sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + R + I.
+
+formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S", X = Y.
+formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S".
+
+listLength([], 0).
+listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.

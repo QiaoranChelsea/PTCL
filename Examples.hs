@@ -8,16 +8,13 @@ import ErrorWarTypes
 import Print
 import Errors
 
-
-
-
 --
 -- * Examples
 --
 
 -- | Define types
 
--- data tree(_a) = node(_a,tree _a ,tree _a ) | leaf
+-- data tree _a = node(_a,tree _a ,tree _a ) | leaf
 def1 :: DefinedType
 def1 = ( DataT "tree" ["_a"] [("node", [(TVar "_a"), TDef "tree" ["_a"] , TDef "tree" ["_a"] ]),("leaf", []) ])
 
@@ -37,67 +34,67 @@ def4 = ( DataT "treeAB" ["_a", "_b"][("nodeAB", [(TVar "_a"), TDef "treeAB" ["_a
 
 -- decl predictes_name(type).
 
--- decl female(atom)
+-- decl female(atom).
 d1 :: Dec
 d1 = PredD ("female", [TAtom])
 
--- decl female(string)
+-- decl female(string).
 d2 :: Dec
 d2 = PredD ("female", [TString])
 
--- decl age(atom,int)
+-- decl age(atom,int).
 d3 :: Dec
 d3 = PredD ("age", [TAtom,TInt])
 
--- decl married_(atom, atom)
+-- decl married_(atom, atom).
 d4 :: Dec
 d4 = PredD ("married_", [TAtom, TAtom])
 
--- decl married(atom, atom)
+-- decl married(atom, atom).
 d5 :: Dec
 d5 = PredD ("married", [TAtom, TAtom])
 
--- decl tree(tree _a )
+-- decl tree(tree _a ).
 d6 :: Dec
 d6 = PredD ("tree", [TDef "tree" ["_a"] ])
 
--- decl isTree(tree _a)
+-- decl isTree(tree _a).
 d7 :: Dec
 d7 = PredD ("isTree", [TDef "tree" ["_a"] ])
 
--- decl sumTree(tree _a , int)
+-- decl sumTree(tree _a , int).
 d8 :: Dec
 d8 = PredD ("sumTree", [TDef "tree" ["_a"] , TInt])
 
--- decl listLength(myLi, int)
+-- decl listLength(myLi, int).
 d9 :: Dec
 d9 = PredD ("listLength", [TDef "myLi" [] , TInt]) -- error
 
--- decl eq(_a, _a)
+-- decl eq(_a, _a).
 d10 :: Dec
 d10 = PredD ("eq", [TVar "_a",TVar "_a"])
 
--- decl eq6(int)
+-- decl eq6(int).
 d11 :: Dec
 d11 = PredD ("eq6", [TInt])
 
--- isEqual(int, atom)
+-- isEqual(int, atom).
 d12 :: Dec
 d12 = PredD ("isEqual", [TInt, TAtom])
 
--- decl eq2(_a, _b)
+-- decl eq2(_a, _b).
 d13 :: Dec
 d13 = PredD ("eq2", [TVar "_a",TVar "_b"])
 
--- decl comTwo(_a, _b)
+-- decl comTwo(_a, _b).
 d14 :: Dec
 d14 = PredD ("comTwo", [TVar "_a",TVar "_b"])
 
--- decl formTree(_a, _b, treeAB _a _b)
+-- decl formTree(_a, _b, treeAB _a _b).
 d15 :: Dec
 d15 = PredD ("formTree", [TVar "a",TVar "b", TDef "treeAB" ["a", "b"]])
 
--- decl doubleAge(atom, int)
+-- decl doubleAge(atom, int).
 d16 :: Dec
 d16 = PredD ("doubleAge", [TAtom,TInt])
 
@@ -115,7 +112,7 @@ e2 = (Head ( "male", [ LitI 5]) [])
 e3 :: Rule
 e3 = (Head ( "male", [Atom "marge"]) [])
 
--- female(list).
+-- male(list).
 e4 :: Rule
 e4 = (Head ( "male", [List [(LitI 8)]]) [])
 
@@ -161,15 +158,15 @@ e13 = (Head ( "married", [ (Var "X"),  (Var "Y" )]) [Pred ( "married_", [ (Var "
 e14 :: Rule
 e14 = (Head ( "eq", [ (Var "X"), ( Var "Y" )]) [OperC Eq (Var "X") (Var "Y")])
 
--- ege6(X) :- eq(6,X)
+-- ege6(X) :- eq(6,X).
 e15 :: Rule
 e15 = (Head ( "eq6", [( Var "X" )]) [(Pred ( "eq", [(LitI 6),(Var "X")]) )])
 
--- ege6(X) :- age(X,Y), eq(X,6)
+-- ege6(X) :- age(X,Y), eq(X,6).
 e16 :: Rule
 e16 = (Head ( "ege6", [( Var "X" )]) [ And (Pred ( "age", [(Var "X"),(Var "Y")]) ) (Pred ( "eq", [(Var "X"), (LitI 6)] ))])
 
--- ege6(X) :- age(X,Y), eq2(X,6)
+-- ege6(X) :- age(X,Y), eq2(X,6).
 e17 :: Rule
 e17 = (Head ( "ege6", [( Var "X" )]) [ And (Pred ( "age", [(Var "X"),(Var "Y")]) ) (Pred ( "eq2", [(Var "X"), (LitI 6)] ))])
 
@@ -181,7 +178,7 @@ e18 = (Head ( "isEqual", [( Var "X" ),( Var "Y" )]) [OperC Eq (Var "X") (Var "Y"
 e19 :: Rule
 e19 = (Head ( "comTwo", [( Var "X" ),( Var "Y" )]) [And (OperC Eq (Var "X") (LitI 5)) (Pred ( "age", [(Var "X"),(Var "Y")]) )   ])
 
--- double(X, Y) :- Y is X * 2.
+-- double(X, Y) :- X * 2 is Y.
 e20 :: Rule
 e20 = (Head ( "double", [ (Var "X"),  (Var "Y" )]) [ Is (OperA Mult  (Var "X")  (LitI 2)) (Var "Y") ])
 
@@ -198,10 +195,10 @@ e23:: Rule
 e23 = Head ("tree", [ (Func ("node", [ (LitI 4), (Atom "leaf"),  (Func ("node", [ (LitI 3), Func ("leaf", [(LitI 4)]) , (Func ("node", [ (LitI 4), (Atom "leaf"), (Atom "leaf")]))     ]))         ]))  ]  ) []
 
 -- isTree(leaf).
--- isTree(node(_, L, R)):- isTree(L),isTree(R).
 e24 :: Rule
 e24 = (Head ("isTree", [ (Atom "leaf")] ) [])
 
+-- isTree(node(_, L, R)):- isTree(L),isTree(R).
 e25 :: Rule
 e25 = (Head ("isTree", [Func ( "node", [  (Var "_"),  (Var "L"),  (Var "R")])]) [ And (Pred ( "isTree", [(Var "R")])) (Pred ("isTree",[(Var "L")] ) ) ])
 
@@ -218,19 +215,19 @@ e27 = Head ( "sumTree", [(Func ("node", [ (Var "I"), (Var "L"), (Var "R")])), (V
 e28:: Rule
 e28 = Head ( "sumTree", [(Func ("node", [ (Var "I"), (Var "L"), (Var "R")])), (Var "T") ])  [ And (Pred ( "sumTree", [ (Var "L"),  (Var "N1")]) ) ( And  ( Pred ( "sumTree", [ (Var "R"), (Var "N2")]) ) (Is (Var "T") (OperA Add (Var "N1") (OperA Add (Var "R") (Var "I")) ))) ]
 
---formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S", X = Y. 
+-- formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S", X = Y. 
 e29:: Rule
 e29 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  Func ( "leafAB", [(Var "Y")]) ,  Func ( "leafAB", [(Var "Y")]) ]) ]) [And (OperC Eq (Var "X") (LitI 5)) (And (OperC Eq (Var "Y") (LitS "S")) (Is (Var "Y") (Var "X"))) ]
 
---formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S".
+-- formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S".
 e30:: Rule
 e30 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  (Var "Y") ,  Func ( "leafAB", [(Var "Y")]) ]) ]) [And (OperC Eq (Var "X") (LitI 5)) (OperC Eq (Var "Y") (LitS "S"))]
 
 -- listLength([], 0).
--- listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
 e31:: Rule
 e31 = (Head ( "listLength", [ (List []),  (LitI 0)] ) [])
 
+-- listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.
 e32:: Rule
 e32 = (Head ( "listLength", [ (List ((Var "_"):[(Var "T")])),  (Var "Total") ]) [ And (Pred ( "listLength", [ (Var "T"),  (Var "N")]) ) (Is ( (Var "Total")) (OperA Add   (LitI 1) (Var "N"))) ])
 
@@ -297,8 +294,6 @@ prolog = [
          , (e30,50)
          , (e31,51)
          , (e32, 20)
-
-
          ]
 
 
