@@ -154,8 +154,8 @@ funcName = predName
 -- | Parse a string closed with "
 stringName :: Parser String
 stringName = do 
-    char '\"'
+    char '"'
     str <- identifier 
-    char '\"'
+    char '"'
     return str
 

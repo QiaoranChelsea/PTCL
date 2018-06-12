@@ -62,8 +62,8 @@ sumTree(0, leaf).
 sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, L ), T is N1 + I.
 sumTree(node(I, L, R), T ):- sumTree(L, N1), sumTree(R, N2), T is N1 + R + I.
 
-# formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S", X = Y.
-# formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S".
+formTree(X,Y, nodeAB(X,leafAB(Y),leafAB(Y))) :- X = 5 , Y = "S", X = Y.
+formTree(X,Y, nodeAB(X,leafAB(Y),leafAB(Y))) :- X = 5 , Y = "S".
 
 listLength([], 0).
 listLength([_|T], Total):-  listLength(T, N) , Total is 1 + N.

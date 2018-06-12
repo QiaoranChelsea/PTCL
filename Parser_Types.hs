@@ -33,6 +33,7 @@ buildinType = TAtom <$ reservedword "atom"
     <|> definedTypeWithParameter 
 
 
+
 definedTypeWithParameter :: Parser Type
 definedTypeWithParameter = do 
     tpname <- typeUdName
@@ -119,7 +120,7 @@ dataCase = do
 
 -- | Parse a list of buildin Type seperate by comma
 typeList :: Parser [Type]
-typeList = buildinType  `sepBy` comma
+typeList = try (buildinType  `sepBy` comma) <|>  (parens buildinType  `sepBy` comma)
 
 --
 -- * Parser for Type Declaration
@@ -146,7 +147,7 @@ predTypeDecl =  do
     return (PredD (pn, tplist))
 
 -- | parse the type declaration of functor which has the return type
-funcTypeDecl :: Parser Dec 
+funcTypeDecl:: Parser Dec 
 funcTypeDecl = do 
     reservedword "decl" 
     pn <- funcName
