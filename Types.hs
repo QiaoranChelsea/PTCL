@@ -3,7 +3,7 @@ module Types where
 import Text.Megaparsec.Pos
 
 -- | Types 
-data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName 
+data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName [Type]
     deriving(Show, Eq)
 
 type Line = Int 

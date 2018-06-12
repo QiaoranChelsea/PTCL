@@ -19,13 +19,13 @@ import Errors
 -- type MyList = List
 
 treeType :: DefinedType
-treeType = ( DataT "Tree" [] [("node", [TInt, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
+treeType = ( DataT "Tree" [] [("node", [TInt, TDef "Tree" [] , TDef "Tree" [] ]),("leaf", []) ])
 
 nameType :: DefinedType
 nameType = ( TypeT "MyList" TList )
 
 treeType2 :: DefinedType
-treeType2 = ( DataT "Tree" [][("node", [TString, TDef "Tree", TDef "Tree" ]),("leaf", []) ])
+treeType2 = ( DataT "Tree" [][("node", [TString, TDef "Tree" [] , TDef "Tree" [] ]),("leaf", []) ])
 
 -- | Declare predicates
 
@@ -59,16 +59,16 @@ d4 :: Dec
 d4 = PredD ("married", [TAtom, TAtom])
 
 d5 :: Dec
-d5 = PredD ("tree", [TDef "Tree"])
+d5 = PredD ("tree", [TDef "Tree" [] ])
 
 d6 :: Dec
-d6 = PredD ("isTree", [TDef "Tree"])
+d6 = PredD ("isTree", [TDef "Tree" [] ])
 
 d7 :: Dec
-d7 = PredD ("sumTree", [TDef "Tree", TInt])
+d7 = PredD ("sumTree", [TDef "Tree" [] , TInt])
 
 d8 :: Dec
-d8 = PredD ("listLength", [TDef "MyLi", TInt]) -- error
+d8 = PredD ("listLength", [TDef "MyLi" [] , TInt]) -- error
 -- d8 = PredD ("listLength", [TDef "MyList", TInt])
 
 
