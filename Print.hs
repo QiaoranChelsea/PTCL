@@ -61,7 +61,7 @@ printDec (FuncD (n, l,t) ) = n ++ "(" ++ printGList l printType "," ++ ") ->" ++
 
 
 printType :: Type -> String
-printType (TDef n ) = show n
+printType (TDef n t ) = show n ++ " " ++ printGList t printType " "
 printType TAtom = "atom"
 printType TString = "string"
 printType TList = "list"
