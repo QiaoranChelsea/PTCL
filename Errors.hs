@@ -5,23 +5,36 @@ import ErrorWarTypes
 import Types
 
 
-checkBodyErr :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> [BodyElem] -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
-checkBodyErr _ [] p d def m = (m, Nothing)
-checkBodyErr f (b:bs) p d def m =  let (m', r ) = checkBodyEleErr f b p d def m in
-                               let (m'', r') =  checkBodyErr f bs p d def m' in  (m'',combineTwoMaybe (r, r'))
 
-checkBodyEleErr :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> BodyElem -> Line ->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
-checkBodyEleErr f (Pred p ) pos d def m = f p pos d def m
-checkBodyEleErr _ b@(Is _ _ )  pos d def m = isErr b pos d def m
-checkBodyEleErr _ b@(OperC _ _ _ )  pos d def m = comErr b pos d def m
-checkBodyEleErr f (And b1 b2) pos d def m =
-                               let (m', r ) = checkBodyEleErr f b1 pos d def m in
-                               let (m'', r') =  checkBodyEleErr f b2 pos d def m' in
-                               (m'',combineTwoMaybe (r, r'))
+----------------------------------------------------------MultConstructorName----------------------------------------------------------------------
 
-----------------------------------------------------------duplicateDef----------------------------------------------------------------------
+multConErr :: TypeDef -> Maybe [Err]
+multConErr [] = Nothing
+multConErr (a@(x,pos):xs) = case x of
+                    (DataT _ _ cs) ->  combineTwoMaybe ( multConErrSelf cs a ,combineTwoMaybe  (multConErr_ cs xs a ,multConErr xs ) )
+                    _ -> Nothing
+                            
+multConErrSelf ::  [Cons] -> (DefinedType,Line) ->  Maybe [Err]
+multConErrSelf [] _           = Nothing
+multConErrSelf ((n,_):xs) a@(def,pos) = case findCon n xs of
+                    Nothing   -> multConErrSelf xs a
+                    (Just _ ) -> Just [E pos (MultCon n def def )]
+          
+multConErr_ :: [Cons]-> TypeDef -> (DefinedType,Line) ->  Maybe [Err]
+multConErr_ [] _ _    = Nothing
+multConErr_ ((n,_):xs) f a = combineTwoMaybe ( multConErrDef_ n f a , multConErr_ xs f a)
+    
+multConErrDef_ :: ConstructorName -> TypeDef -> (DefinedType,Line) ->  Maybe [Err]
+multConErrDef_ _ [] _ = Nothing
+multConErrDef_ n (f@(x,_):xs)  a@(def,pos) =  case x of
+                                        (DataT _ _ cs) ->  case findCon n cs of
+                                                            Nothing -> Nothing
+                                                            Just _ ->  combineTwoMaybe (Just [E pos (MultCon n def x )] ,multConErrDef_ n xs a )
+                                        _ ->  multConErrDef_ n xs a
 
--- find deuplicated def's
+----------------------------------------------------------unknowType----------------------------------------------------------------------
+
+-- find unknowType types
 unknowType :: TypeDic -> TypeDef -> Maybe [Err]
 unknowType [] _ = Nothing
 unknowType (x:xs) def = combineTwoMaybe(unknowType_ x def, unknowType xs def)
@@ -40,8 +53,7 @@ checktype  (TDef n _ ) (d, pos) def =  case findType n def of
                                     Nothing -> Just [E pos (UnknowType  n d ([],[]))]
                                     _ -> Nothing
 checktype _ _ _ = Nothing
-       
-                                              
+                   
 ----------------------------------------------------------duplicateDef----------------------------------------------------------------------
 
 -- find deuplicated def's
@@ -66,7 +78,26 @@ duplicateDec_ _ [] = Nothing
 duplicateDec_ v@(t,p) ((x,_):xs) = if (decName t == decName x) then combineTwoMaybe (Just [E p (MultDec t x ([],[]))], duplicateDec_ v xs)
                                                                         else duplicateDec_ v xs
 
-------------------------------------------------------Is Oper----------------------------------------------------------------------
+------------------------------------------------------Type erros----------------------------------------------------------------------
+
+-- find errors in the body of a predicate 
+checkBodyErr :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> [BodyElem] -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+checkBodyErr _ [] p d def m = (m, Nothing)
+checkBodyErr f (b:bs) p d def m =  let (m', r ) = checkBodyEleErr f b p d def m in
+                               let (m'', r') =  checkBodyErr f bs p d def m' in  (m'',combineTwoMaybe (r, r'))
+
+-- find errors in a body element
+checkBodyEleErr :: (PredFunA -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])) -> BodyElem -> Line ->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
+checkBodyEleErr f (Pred p ) pos d def m = f p pos d def m
+checkBodyEleErr _ b@(Is _ _ )  pos d def m = isErr b pos d def m
+checkBodyEleErr _ b@(OperC _ _ _ )  pos d def m = comErr b pos d def m
+checkBodyEleErr f (And b1 b2) pos d def m =
+                               let (m', r ) = checkBodyEleErr f b1 pos d def m in
+                               let (m'', r') =  checkBodyEleErr f b2 pos d def m' in
+                               (m'',combineTwoMaybe (r, r'))
+
+
+------------------------------------------------------ComparisonErr----------------------------------------------------------------------
 
 comErr :: BodyElem -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 comErr b@(OperC Eq l r) pos d def m   =  unifyForCom b pos d def m
@@ -90,6 +121,7 @@ unifyForCom b@(OperC _ l r) pos _ def m   =  let (m1, argT1) = argumentType l m 
                                                             let res = if x' then Nothing else Just([E pos (EqType b t1 t2 m3)]) in
                                                             (m3,res)
 
+------------------------------------------------------IsErr----------------------------------------------------------------------
 
 isErr :: BodyElem -> Line -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Err])
 isErr b@(Is (LitI _) _) pos d def m = isErr_ b pos d def m
@@ -111,8 +143,6 @@ isErr_ b@(Is _ r) pos d def m = let (m',x) = (unifyArgT TInt r def m) in
                                         case x of
                                          True -> (m', Nothing)
                                          False -> (m', Just [E pos (VariableType b TInt m')])
-
-
 
 ------------------------------------------------------ArgType IncArrit----------------------------------------------------------------------
 
@@ -143,6 +173,34 @@ errorType :: Maybe ErrType -> PredFunA -> Line -> Dec -> VarMap-> Maybe [Err]
 errorType Nothing  _ _ _   _  = Nothing
 errorType (Just TErr) p pos d m = Just [E pos (ArgType d p m )]
 errorType (Just ArrT) p pos d m= Just [E pos (IncArrit d p m)]
+
+----------------------------------------------------------substitue------------------------------------------------------------------------
+
+tVar = "a"
+
+unifyArgVar :: VarName -> Type -> VarMap -> (VarMap, Bool)
+unifyArgVar n t m@(m',s)  = case findVar n m' of
+                    Nothing -> (addToVarMap (n, t) m, True)
+                    Just x ->  case (varType x) of
+                             (TVar v) -> substit m v t
+                             t'       ->  unifyWithType t t' m
+
+
+unifyWithType :: Type -> Type -> VarMap -> (VarMap, Bool)
+unifyWithType (TVar v) t m@(m',s) = case findInSub s v of 
+                                     Nothing -> substit m v t
+                                     (Just (v, t') ) -> if  (t  == t')  then (m, True) else (m, False)
+unifyWithType t t' m = if  (t  == t')  then (m, True) else (m, False)
+
+substit:: VarMap -> VarName  -> Type -> (VarMap, Bool)
+substit m'@(m,s) v t =  case t of
+                        (TVar v) -> (m',True) 
+                        _ -> case findInSub s v of 
+                         Nothing -> ((m, (v,t):s ), True  )
+                         Just (v,vt) -> let b = if vt == t then True else False in 
+                                  (m', b  )
+
+----------------------------------------------------------unify------------------------------------------------------------------------
 
 -- unify the arguemtn's list with the type's list
 unifyArgsE ::  [Argument] -> [Type] ->TypeDef -> VarMap ->  (VarMap ,Maybe ErrType)
@@ -197,10 +255,7 @@ argumentType  (OperA _ l r ) m =
                             let res = if (l' && r') then Just TInt else Nothing 
                             in (m'',res)
 argumentType  (Func _ ) m = (m, Just (TVar tVar))
-
-
-
-                    
+  
 
 unifyAtom_ :: Argument  -> VarMap ->  (VarMap, Bool)
 unifyAtom_ (Atom _ ) m = (m, True)
@@ -228,38 +283,6 @@ unifyList_ (List _ ) m = (m, True)
 unifyList_ (Var v ) m = unifyArgVar v TList m
 unifyList_ (Func _ ) m = (m, True)
 unifyList_ _            m = (m, False)
-
-----------------------------------------------------------unify------------------------------------------------------------------------
-
-tVar = "a"
-
-unifyArgVar :: VarName -> Type -> VarMap -> (VarMap, Bool)
-unifyArgVar n t m@(m',s)  = case findVar n m' of
-                    Nothing -> (addToVarMap (n, t) m, True)
-                    Just x ->  case (varType x) of
-                             (TVar v) -> substit m v t
-                             t'       ->  unifyWithType t t' m
-
-
-unifyWithType :: Type -> Type -> VarMap -> (VarMap, Bool)
-unifyWithType (TVar v) t m@(m',s) = case findInSub s v of 
-                                     Nothing -> substit m v t
-                                     (Just (v, t') ) -> if  (t  == t')  then (m, True) else (m, False)
-unifyWithType t t' m = if  (t  == t')  then (m, True) else (m, False)
-
-substit:: VarMap -> VarName  -> Type -> (VarMap, Bool)
-substit m'@(m,s) v t =  case t of
-                        (TVar v) -> (m',True) 
-                        _ -> case findInSub s v of 
-                         Nothing -> ((m, (v,t):s ), True  )
-                         Just (v,vt) -> let b = if vt == t then True else False in 
-                                  (m', b  )
-
-
-
-----------------------------------------------------------unify------------------------------------------------------------------------
-
-
 
 -- unify argumnet with defined type (data/type)
 unifyDefinedType :: (DefinedType,Line) -> Argument -> TypeDef -> VarMap -> (VarMap, Bool)
@@ -303,37 +326,3 @@ typeErrP ((Head p b), pos) d f =
     let ( m,r)= doesMatch p pos d f ([],[])  in
     let (m',r') = checkBodyErr doesMatch b pos d f m in
     printMap m'
- ----------------------------------------------------------printMap------------------------------------------------------------------------
-    
--- replcaceByType ::  TypeVar  -> Type -> VarMap -> VarMap
--- replcaceByType _ _ m@([],s) = m
--- replcaceByType tv t ((d@(v,(TVar x)):xs) ,s)= let m' = replcaceByType tv t (xs,s) in
---                                                 if x ==  tv
---                                                     then addToVarMap (v,t) m'
---                                                     else addToVarMap d m'
--- replcaceByType tv t ((d:xs) , s )=   let m' = replcaceByType tv t (xs,s) in  addToVarMap d m'
-
--- replcaceType ::  VarTypes -> VarName ->Type-> VarTypes
--- replcaceType [] _ _ = []
--- replcaceType (x:xs) n t = if (varName x) == n then ( (n,t): xs) else ( x : (replcaceType xs n t))
-
---
--- -- compT :: Type -> Type -> Bool
--- -- compT TAtom TAtom = True
--- -- compT TInt TInt = True
--- -- compT TString TString = True
--- -- compT TList TList = True
--- -- compT (TVar x ) (TVar y) = x == y
--- -- compT (TDef x ) (TDef y) = x == y
--- -- compT _ _ = False
-
--- -- checkBodyB :: [BodyElem] -> TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Error])
--- -- checkBodyB [] _ _ m = (m, Nothing)
--- -- checkBodyB (b:bs) d def m =  let (m', r ) = checkBodyEleB b d def m in
--- --                                let (m'', r') =  checkBodyB bs d def m' in
--- --                                (m'',combineTwoMaybe (r, r'))
---
--- -- checkBodyEleB :: BodyElem ->  TypeDic -> TypeDef -> VarMap -> (VarMap, Maybe [Error])
--- -- checkBodyEleB b@(Is _ _ ) d def m = isErr b d def m
--- -- checkBodyEleB b@(OperC _ _ _) d def m = comErr b d def m
--- -- checkBodyEleB  _ _ _  m = (m, Nothing)
