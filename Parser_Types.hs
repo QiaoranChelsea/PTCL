@@ -29,7 +29,21 @@ buildinType = TAtom <$ reservedword "atom"
     <|> TInt <$ reservedword "int"
     <|> TString <$ reservedword "string"
     <|> TList <$ reservedword "list"
-    <|> TDef <$> identifier
+    <|> typeVar
+    <|> definedTypeWithParameter 
+
+
+definedTypeWithParameter :: Parser Type
+definedTypeWithParameter = do 
+    tpname <- typeUdName
+    vname  <- many typeVarName
+    return (TDef tpname vname )
+
+
+typeVar :: Parser Type 
+typeVar = do
+    vname <- typeVarName
+    return (TVar vname )
 
 
 
@@ -49,7 +63,7 @@ definedType' = typeType
 
 -- | parser for type constructor
 typeType :: Parser DefinedType
-typeType = try typeType1 <|> typeType2
+typeType = typeType1 
 
 typeType1 :: Parser DefinedType 
 typeType1 =  do 
@@ -59,13 +73,13 @@ typeType1 =  do
     tp     <- buildinType
     return $ TypeT tName tp
 
-typeType2 :: Parser DefinedType 
-typeType2 =  do 
-    reservedword "type"
-    tName  <- typeUdName
-    void (symbol "=")
-    tp     <- typeUdName
-    return $ TypeT tName (TDef tp) 
+-- typeType2 :: Parser DefinedType 
+-- typeType2 =  do 
+--     reservedword "type"
+--     tName  <- typeUdName
+--     void (symbol "=")
+--     tp     <- typeUdName
+--     return $ TypeT tName (TDef tp) 
 
 
 -- | Parser for data type 
@@ -134,7 +148,7 @@ predTypeDecl =  do
 -- | parse the type declaration of functor which has the return type
 funcTypeDecl :: Parser Dec 
 funcTypeDecl = do 
-    -- reservedword "decl" 
+    reservedword "decl" 
     pn <- funcName
     void (symbol "(") 
     tplist <- typeList  
