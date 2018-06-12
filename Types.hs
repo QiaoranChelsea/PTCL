@@ -3,7 +3,7 @@ module Types where
 import Text.Megaparsec.Pos
 
 -- | Types 
-data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName [Type]
+data Type = TAtom | TInt | TString| TList | TVar TypeVar | TDef TypeName [TypeVar]
     deriving(Show, Eq)
 
 type Line = Int 
@@ -84,8 +84,4 @@ data BodyElem  = Pred PredFunA
 data Prolog = PL (TypeDef, TypeDic, Prog)
     deriving (Show)
 
-
--- newtype SourcePos  = SourcePos {sourceName   :: FilePath  -- Name of source file
---                                 sourceLine   :: !Pos      -- Line number
---                                 sourceColumn :: !Pos}     -- Column number 
      

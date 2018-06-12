@@ -18,8 +18,8 @@ data Error = ArgType Dec PredFunA VarMap
             | EqType BodyElem Type Type VarMap
             | MissIs  BodyElem
             
-            | UnknowType TypeName Dec            
-            | MultDec Dec Dec
+            | UnknowType TypeName Dec VarMap          
+            | MultDec Dec Dec VarMap
             | MultDef DefinedType DefinedType
             
 type VarMap = (VarTypes,Subsitutions)
@@ -61,6 +61,22 @@ definedTypeName :: DefinedType -> TypeName
 definedTypeName (TypeT n _) = n
 definedTypeName (DataT n _ _) = n
 
+-- find if a type exist in defined types
+findType :: TypeName -> TypeDef -> Maybe (DefinedType,Line)
+findType _ [] = Nothing
+findType n (v@(x,_):xs) = if definedTypeName x == n then Just v else findType n xs
+
+findInSub :: Subsitutions -> VarName -> Maybe Substitute
+findInSub [] _ = Nothing
+findInSub (x:xs) n = if (varName x) == n then Just x else findInSub xs n 
+
+
+ -- find constructor
+findCon :: String -> [Cons] -> Maybe Cons
+findCon _ [] = Nothing
+findCon n (x:xs) = if constructorName x == n then Just x else findCon n xs
+
+
 addToVarMap :: VarType -> VarMap -> VarMap
 addToVarMap vt (m,s) = (vt:m, s)
 
@@ -88,3 +104,16 @@ getPos (_,p) = p
 
 getObj :: (a,Line) -> a
 getObj (a,_) = a
+
+printMap :: VarMap -> String
+printMap (m,s) = printa m ++ "\n" ++ printa s
+
+printa :: Show a => [a] -> String
+printa [] = "\n"
+printa (x:xs) = show x ++ printa xs
+
+lookup' :: (Eq b) => b -> [(a,b)] -> Maybe a
+lookup' _ [] =  Nothing
+lookup' key ((x,y):xys)
+  | key == y  =  Just x
+  | otherwise =  lookup' key xys

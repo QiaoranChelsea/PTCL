@@ -37,12 +37,11 @@ checktypesList (x:xs) p def =  combineTwoMaybe ( checktype x p def ,checktypesLi
 
 checktype :: Type -> (Dec, Line) -> TypeDef -> Maybe[Err]
 checktype  (TDef n _ ) (d, pos) def =  case findType n def of
-                                    Nothing -> Just [E pos (UnknowType  n d )]
+                                    Nothing -> Just [E pos (UnknowType  n d ([],[]))]
                                     _ -> Nothing
 checktype _ _ _ = Nothing
        
-
-                                                                        
+                                              
 ----------------------------------------------------------duplicateDef----------------------------------------------------------------------
 
 -- find deuplicated def's
@@ -55,17 +54,16 @@ duplicateDef_ _ [] = Nothing
 duplicateDef_ v@(t,p) ((x,_):xs) = if (definedTypeName t == definedTypeName x) then combineTwoMaybe (Just [E p (MultDef t x) ], duplicateDef_ v xs)
                                                                         else duplicateDef_  v xs
 
--- ----------------------------------------------------------duplicateDec----------------------------------------------------------------------
---
--- find deuplicated dec's
+----------------------------------------------------------duplicateDec----------------------------------------------------------------------
 
+-- find deuplicated dec's
 duplicateDec :: TypeDic -> Maybe [Err]
 duplicateDec [] = Nothing
 duplicateDec (x:xs) = combineTwoMaybe(duplicateDec_ x xs, duplicateDec xs)
 
 duplicateDec_ :: (Dec, Line) -> TypeDic -> Maybe [Err]
 duplicateDec_ _ [] = Nothing
-duplicateDec_ v@(t,p) ((x,_):xs) = if (decName t == decName x) then combineTwoMaybe (Just [E p (MultDec t x)], duplicateDec_ v xs)
+duplicateDec_ v@(t,p) ((x,_):xs) = if (decName t == decName x) then combineTwoMaybe (Just [E p (MultDec t x ([],[]))], duplicateDec_ v xs)
                                                                         else duplicateDec_ v xs
 
 ------------------------------------------------------Is Oper----------------------------------------------------------------------
@@ -116,8 +114,8 @@ isErr_ b@(Is _ r) pos d def m = let (m',x) = (unifyArgT TInt r def m) in
 
 
 
--- ------------------------------------------------------ArgType IncArrit----------------------------------------------------------------------
---
+------------------------------------------------------ArgType IncArrit----------------------------------------------------------------------
+
 -- combine type errors and errities errors
 typeErrs :: Prog -> TypeDic ->TypeDef ->  Maybe [Err]
 typeErrs [] _ _ = Nothing
@@ -137,7 +135,7 @@ doesMatch p@(n, b ) pos ((d,_):ds) f m =
             if n == decName d
             then let (m', r) = unifyArgsE b (decTypes d) f m in
                  let (m'',r') = doesMatch p pos ds f m' in
-                 (m'', (combineTwoMaybe( errorType r  p pos d m,r' )))
+                 (m'', (combineTwoMaybe( errorType r  p pos d m'',r' )))
             else  doesMatch p pos ds f m
 
 -- add the error to the report based on the type of the error
@@ -156,8 +154,7 @@ unifyArgsE (b:bs) (t:ts) f m =  let (m', r) = (unifyArgT t b f m) in
                                     True -> (unifyArgsE bs ts f m')
                                     False -> (m',Just TErr)
                                     
-                                    
-                                    
+                                                            
 -- unify one argument with one type
 unifyArgT :: Type -> Argument -> TypeDef -> VarMap ->  (VarMap, Bool)
 unifyArgT x y f m= case x of
@@ -202,13 +199,7 @@ argumentType  (OperA _ l r ) m =
 argumentType  (Func _ ) m = (m, Just (TVar tVar))
 
 
-replcaceByType ::  TypeVar  -> Type -> VarMap -> VarMap
-replcaceByType _ _ m@([],s) = m
-replcaceByType tv t ((d@(v,(TVar x)):xs) ,s)= let m' = replcaceByType tv t (xs,s) in 
-                                                if x ==  tv 
-                                                    then addToVarMap (v,t) m' 
-                                                    else addToVarMap d m'                               
-replcaceByType tv t ((d:xs) , s )=   let m' = replcaceByType tv t (xs,s) in  addToVarMap d m' 
+
                     
 
 unifyAtom_ :: Argument  -> VarMap ->  (VarMap, Bool)
@@ -247,47 +238,43 @@ unifyArgVar n t m@(m',s)  = case findVar n m' of
                     Nothing -> (addToVarMap (n, t) m, True)
                     Just x ->  case (varType x) of
                              (TVar v) -> substit m v t
-                             t'       ->  unifyWithTye t t' m
+                             t'       ->  unifyWithType t t' m
 
 
-unifyWithTye :: Type -> Type -> VarMap -> (VarMap, Bool)
-unifyWithTye (TVar v) t m@(m',s) = case findInSub s v of 
-                                     Nothing -> (m, False)
-                                     (Just (v, t') ) -> if  (t  == t)  then (m, True) else (m, False)
-unifyWithTye t t' m = if  (t  == t')  then (m, True) else (m, False)
+unifyWithType :: Type -> Type -> VarMap -> (VarMap, Bool)
+unifyWithType (TVar v) t m@(m',s) = case findInSub s v of 
+                                     Nothing -> substit m v t
+                                     (Just (v, t') ) -> if  (t  == t')  then (m, True) else (m, False)
+unifyWithType t t' m = if  (t  == t')  then (m, True) else (m, False)
 
 substit:: VarMap -> VarName  -> Type -> (VarMap, Bool)
-substit (m,s) v t =  case findInSub s v of 
+substit m'@(m,s) v t =  case t of
+                        (TVar v) -> (m',True) 
+                        _ -> case findInSub s v of 
                          Nothing -> ((m, (v,t):s ), True  )
-                         Just (v,vt) -> 
-                                 let b = if vt == t then True else False in 
-                                  ((m, s ), b  )
+                         Just (v,vt) -> let b = if vt == t then True else False in 
+                                  (m', b  )
 
-findInSub :: Subsitutions -> VarName -> Maybe Substitute
-findInSub [] _ = Nothing
-findInSub (x:xs) n = if (varName x) == n then Just x else findInSub xs n 
+
 
 ----------------------------------------------------------unify------------------------------------------------------------------------
 
--- find if a type exist in defined types
-findType :: TypeName -> TypeDef -> Maybe (DefinedType,Line)
-findType _ [] = Nothing
-findType n (v@(x,_):xs) = if definedTypeName x == n then Just v else findType n xs
+
 
 -- unify argumnet with defined type (data/type)
 unifyDefinedType :: (DefinedType,Line) -> Argument -> TypeDef -> VarMap -> (VarMap, Bool)
 unifyDefinedType ((TypeT _ t ),_) a f m = unifyArgT t a f m
-unifyDefinedType ((DataT _ _ cs ),_) a f m = unifyDef a cs f m
+unifyDefinedType (t@(DataT _ _ cs ),_) a f m = unifyDef a t f m
 
 
 -- unify argumnet with defined type constructor
-unifyDef :: Argument ->  [Cons] -> TypeDef -> VarMap -> (VarMap, Bool)
-unifyDef (Var _ ) _ _ m= (m, True)
-unifyDef (Atom n ) cs _ m =  unifyAtomFunc n cs m
-unifyDef (Func (n,t) ) cs f m = case findCon n cs of
+unifyDef :: Argument -> DefinedType -> TypeDef -> VarMap -> (VarMap, Bool)
+unifyDef (Var x ) (DataT n v _ ) _  m       = unifyArgVar x (TDef n v) m
+unifyDef (Atom n ) (DataT _ _  cs ) _ m     =  unifyAtomFunc n cs m
+unifyDef (Func (n,t) ) (DataT _ _  cs ) f m = case findCon n cs of
                               Nothing -> (m, False)
                               Just c  -> unifyFunc (constructorTypes c) t f m
-unifyDef _ _ _  m = (m, False)
+unifyDef _ _ _  m             = (m, False)
 
 
 -- unify atom argumnet with empty constructor
@@ -297,10 +284,7 @@ unifyAtomFunc n (x:xs) m = case x of
                               (n, []) -> (m, True)
                               _   -> unifyAtomFunc n xs m
 
- -- find constructor
-findCon :: String -> [Cons] -> Maybe Cons
-findCon _ [] = Nothing
-findCon n (x:xs) = if constructorName x == n then Just x else findCon n xs
+
 
 -- unify a the argument of functor with list of types
 unifyFunc :: [Type] -> [Argument] -> TypeDef ->  VarMap -> (VarMap, Bool)
@@ -313,12 +297,6 @@ unifyFunc (t:ts) (a:as) f m =  let (m', r) = unifyArgT t a f m in
 
 ----------------------------------------------------------printMap------------------------------------------------------------------------
 
-printMap :: VarMap -> String
-printMap (m,s) = printa m ++ "\n" ++ printa s
-
-printa :: Show a => [a] -> String
-printa [] = "\n"
-printa (x:xs) = show x ++ printa xs
 
 typeErrP ::(Rule, Line) -> TypeDic ->TypeDef  -> String
 typeErrP ((Head p b), pos) d f =
@@ -327,6 +305,14 @@ typeErrP ((Head p b), pos) d f =
     printMap m'
  ----------------------------------------------------------printMap------------------------------------------------------------------------
     
+-- replcaceByType ::  TypeVar  -> Type -> VarMap -> VarMap
+-- replcaceByType _ _ m@([],s) = m
+-- replcaceByType tv t ((d@(v,(TVar x)):xs) ,s)= let m' = replcaceByType tv t (xs,s) in
+--                                                 if x ==  tv
+--                                                     then addToVarMap (v,t) m'
+--                                                     else addToVarMap d m'
+-- replcaceByType tv t ((d:xs) , s )=   let m' = replcaceByType tv t (xs,s) in  addToVarMap d m'
+
 -- replcaceType ::  VarTypes -> VarName ->Type-> VarTypes
 -- replcaceType [] _ _ = []
 -- replcaceType (x:xs) n t = if (varName x) == n then ( (n,t): xs) else ( x : (replcaceType xs n t))
