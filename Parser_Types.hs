@@ -137,12 +137,12 @@ typedecl' = try funcTypeDecl <|>  predTypeDecl
 -- | parse the type declaration of predicate
 predTypeDecl :: Parser Dec 
 predTypeDecl =  do 
-    -- reservedword "decl" 
+    reservedword "decl" 
     pn <- predName
     void (symbol "(") 
     tplist <- typeList  
     void (symbol ")")
-    void (symbol ".") <?> "type declaration should end with '.' "
+    -- void (symbol ".") <?> "type declaration should end with '.' "
     return (PredD (pn, tplist))
 
 -- | parse the type declaration of functor which has the return type
@@ -155,7 +155,7 @@ funcTypeDecl = do
     void (symbol ")")
     void (symbol "->")
     rtlist <- buildinType
-    void (symbol ".") <?> "type declaration should end with '.' "
+    -- void (symbol ".") <?> "type declaration should end with '.' "
     return (FuncD (pn, tplist,rtlist))
 
 
