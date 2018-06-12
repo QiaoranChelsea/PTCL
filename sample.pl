@@ -1,4 +1,4 @@
-data tree _a = node(_a,tree _a ,tree _a ) | lea.
+data tree _a = node(_a,tree _a ,tree _a ) | leaf.
 type myList = list.
 data tree = node(string,tree ,tree ) | leaf.
 data treeAB _a _b = node(_a,treeAB _a _b,treeAB _a _b) | leaf(_b).
