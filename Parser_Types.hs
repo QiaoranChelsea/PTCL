@@ -12,6 +12,11 @@ import Text.Megaparsec.Pos
 import Types 
 import Parser_Lexer
 
+import TypeChecker
+import ErrorWarTypes
+import Print
+import Errors
+
 
 
 -- 
