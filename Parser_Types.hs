@@ -31,6 +31,7 @@ buildinType = TAtom <$ reservedword "atom"
     <|> TList <$ reservedword "list"
     <|> typeVar
     <|> definedTypeWithParameter 
+    <|> parens buildinType
 
 
 

@@ -49,6 +49,7 @@ argument = try optAExpr
    <|> try listNormal
    <|> try listVar
    <|> try (Var <$> varName)
+   <|> parens argument
 
 predFunA :: Parser PredFunA 
 predFunA = do 
