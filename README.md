@@ -6,7 +6,7 @@ The Prolog Type Checking language (PTCL) checks that predicates in a Prolog prog
 
 #  Instructions for running
 
-You need to download SourcePos is from module Megaparsec. 
+You need to download SourcePos from module Megaparsec. 
 You should download it in your machine by typing  
 
 $ cabal install megaparsec
