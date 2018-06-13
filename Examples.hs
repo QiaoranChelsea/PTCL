@@ -26,7 +26,7 @@ def2 = ( TypeT "myList" TList )
 def3 :: DefinedType
 def3 = ( DataT "tree" [][("node", [TString, TDef "tree" [] , TDef "tree" [] ]),("leaf", []) ])
 
--- data treeAB _a _b = node(_a, treeAB _a _b, treeAB _a _b) | leaf(_b).
+-- data treeAB _a _b = nodeAB(_a, treeAB _a _b, treeAB _a _b) | leafAB(_b).
 def4 :: DefinedType
 def4 = ( DataT "treeAB" ["_a", "_b"][("nodeAB", [(TVar "_a"), TDef "treeAB" ["_a", "_b"] , TDef "treeAB" ["_a", "_b"] ]),("leafAB", [TVar "_b"]) ])
 
@@ -56,7 +56,7 @@ d5 = PredD ("married", [TAtom, TAtom])
 
 -- decl tree(tree _a ).
 d6 :: Dec
-d6 = PredD ("tree", [TDef "tree" ["_a"] ])
+d6 = PredD ("myTree", [TDef "tree" ["_a"] ])
 
 -- decl isTree(tree _a).
 d7 :: Dec
@@ -188,11 +188,11 @@ e21 = (Head ( "tree", [(Atom "leaf")] ) [])
 
 -- tree(node(leaf , leaf, leaf)).
 e22:: Rule
-e22 = Head ("tree", [ (Func ("node", [ (Atom "leaf"), (Atom "leaf"), (Atom "leaf")]))  ]  ) []
+e22 = Head ("myTree", [ (Func ("node", [ (Atom "leaf"), (Atom "leaf"), (Atom "leaf")]))  ]  ) []
 
 -- tree(node(4, leaf, node(3,leaf(4), node(4,leaf, leaf)))).
 e23:: Rule
-e23 = Head ("tree", [ (Func ("node", [ (LitI 4), (Atom "leaf"),  (Func ("node", [ (LitI 3), Func ("leaf", [(LitI 4)]) , (Func ("node", [ (LitI 4), (Atom "leaf"), (Atom "leaf")]))     ]))         ]))  ]  ) []
+e23 = Head ("myTree", [ (Func ("node", [ (LitI 4), (Atom "leaf"),  (Func ("node", [ (LitI 3), Func ("leaf", [(LitI 4)]) , (Func ("node", [ (LitI 4), (Atom "leaf"), (Atom "leaf")]))     ]))         ]))  ]  ) []
 
 -- isTree(leaf).
 e24 :: Rule
@@ -215,13 +215,13 @@ e27 = Head ( "sumTree", [(Func ("node", [ (Var "I"), (Var "L"), (Var "R")])), (V
 e28:: Rule
 e28 = Head ( "sumTree", [(Func ("node", [ (Var "I"), (Var "L"), (Var "R")])), (Var "T") ])  [ And (Pred ( "sumTree", [ (Var "L"),  (Var "N1")]) ) ( And  ( Pred ( "sumTree", [ (Var "R"), (Var "N2")]) ) (Is (Var "T") (OperA Add (Var "N1") (OperA Add (Var "R") (Var "I")) ))) ]
 
--- formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S", X = Y. 
+-- formTree(X,Y, nodeAB(X,leafAB(Y),leafAB(Y))) :- X = 5 , Y = "S",  X is Y.
 e29:: Rule
-e29 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  Func ( "leafAB", [(Var "Y")]) ,  Func ( "leafAB", [(Var "Y")]) ]) ]) [And (OperC Eq (Var "X") (LitI 5)) (And (OperC Eq (Var "Y") (LitS "S")) (Is (Var "Y") (Var "X"))) ]
+e29 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  Func ( "leafAB", [(Var "Y")]) ,  Func ( "leafAB", [(Var "Y")]) ]) ]) [And (Is (Var "X") (LitI 5)) (And (OperC Eq (Var "Y") (LitS "S")) (Is (Var "Y") (Var "X"))) ]
 
--- formTree(X,Y, nodeAB(X,(leafAB(Y)),(leafAB(Y)))) :- X = 5 , Y = "S".
+-- formTree(X,Y, nodeAB(X,Y,(leafAB(Y)))):=  X is 5 , Y = "S".
 e30:: Rule
-e30 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  (Var "Y") ,  Func ( "leafAB", [(Var "Y")]) ]) ]) [And (OperC Eq (Var "X") (LitI 5)) (OperC Eq (Var "Y") (LitS "S"))]
+e30 = Head ( "formTree", [(Var "X"), (Var "Y") , Func ( "nodeAB", [  (Var "X"),  (Var "Y") ,  Func ( "leafAB", [(Var "Y")]) ]) ])   [And (OperC Eq (Var "X") (LitI 5)) (OperC Eq (Var "Y") (LitS "S"))]
 
 -- listLength([], 0).
 e31:: Rule
@@ -306,4 +306,4 @@ domain (typsdef, typdec, prolog ) = checker (typsdef, typdec, prolog )
 v = putStrLn $ printReport (domain (typsdef, typdec, prolog )) typsdef prolog
 -- --
 -- --
--- k = putStrLn $ typeErrP (e32,44) typdec typsdef
+k = putStrLn $ typeErrP (e32,44) typdec typsdef

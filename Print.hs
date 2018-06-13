@@ -38,14 +38,14 @@ printClause l p = case lookup' l p of
                     Just r -> "- In " ++ printRule r ++ "\n\n"
 
 printError :: Error -> TypeDef -> String
-printError  (MultCon n f1 f2) def     =  "- Overlaoding constructor name " ++ n ++ "\n - In " ++ printTypeDef f1 def emptyMap ++ "\n - In " ++  printTypeDef f2 def emptyMap ++ " \n"
-printError  (ArgType d p m ) def      =  "- Couldn't match expected type "++  printDec d def m ++ " with " ++ printPredFunType p m def ++ "\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
-printError  (IncArrit d p m ) def     = "- The predicate for "++  printDec d def m  ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p m def ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In the clause " ++ printPredFunVal p ++ "\n"
-printError  (MultDef t1 t2 ) def      = "- Multiple definitions of " ++ definedTypeName t1 ++ "\n- Defined at:\n- " ++ printTypeDef t1 def emptyMap++ " \n- " ++ printTypeDef t2 def emptyMap ++ "\n"
-printError  (MultDec t1 t2 m ) def    = "- Multiple declarations of " ++ decName t1 ++ "\n- Declared at\n- " ++ printDec t1 def m  ++ " \n- " ++ printDec t2 def m  ++ "\n"
-printError  (MissIs b ) _             = "Misuse of \"is\": expecting Number in the left hand side of \"is\" \n- In " ++  printBodyEle b ++ "\n"
-printError  (UnknowType n d m) def    = "Unknown User-Defined-Type \"" ++ n ++ "\" \n- Declared at: " ++ printDec d def m   ++ "\n"
-printError  (EqType b t1 t2 m) def    = "The types \"" ++ printType t1 m def ++ "\" and  \"" ++ printType t2 m def ++ "\" do not match \n- In: " ++ printBodyEle b ++ "\n"
+printError  (MultCon n f1 f2) def     =  "- Overloading constructor name " ++ n ++ "\n - In " ++ printTypeDef f1 def emptyMap ++ "\n - In " ++  printTypeDef f2 def emptyMap ++ " \n"
+printError  (ArgType d p m ) def      =  "- Couldn't match expected type "++  printDec d def m ++ " with " ++ printPredFunType p m def ++ "\n" ++ "- In " ++ printPredFunVal p ++ "\n"
+printError  (IncArrit d p m ) def     = "- The predicate for "++  printDec d def m  ++ " expect " ++ show (numArDec d)  ++ " arguments, but " ++  printPredFunType p m def ++ " has " ++ show (numArPred p)  ++ " arguments.\n" ++ "- In " ++ printPredFunVal p ++ "\n"
+printError  (MultDef t1 t2 ) def      = "- Overloading definition of " ++ definedTypeName t1 ++ "\n- Defined at:\n- " ++ printTypeDef t1 def emptyMap++ " \n- " ++ printTypeDef t2 def emptyMap ++ "\n"
+printError  (MultDec t1 t2 m ) def    = "- Overloading declaration of " ++ decName t1 ++ "\n- Declared at\n- " ++ printDec t1 def m  ++ " \n- " ++ printDec t2 def m  ++ "\n"
+printError  (MissIs b ) _             = "- Misuse of \"is\": expecting Number in the left hand side of \"is\" \n- In " ++  printBodyEle b ++ "\n"
+printError  (UnknowType n d m) def    = "- Unknown User-Defined-Type \"" ++ n ++ "\" \n- Declared at: " ++ printDec d def m   ++ "\n"
+printError  (EqType b t1 t2 m) def    = "- The types \"" ++ printType t1 m def ++ "\" and \"" ++ printType t2 m def ++ "\" do not match \n- In: " ++ printBodyEle b ++ "\n"
 printError  (VariableType b t m) def  = typeVarErr b t m def
 
 
