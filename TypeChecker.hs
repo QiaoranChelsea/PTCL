@@ -8,8 +8,8 @@ import Warnings
 
 ----------------------------------------------------------------------------------------------------------------------------------
 
-chcker :: (TypeDef,TypeDic, Prog) -> Report
-chcker (typsdef, typdec, prolog ) = R  (errors typsdef typdec prolog  ) (warnings prolog typdec typsdef )
+checker :: (TypeDef,TypeDic, Prog) -> Report
+checker (typsdef, typdec, prolog ) = R  (errors typsdef typdec prolog  ) (warnings prolog typdec typsdef )
 
 -- combine errors
 errors :: TypeDef -> TypeDic -> Prog -> Maybe [Err]

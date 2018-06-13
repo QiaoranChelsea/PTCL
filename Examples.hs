@@ -298,7 +298,7 @@ prolog = [
 
 
 domain :: Domain
-domain (typsdef, typdec, prolog ) = chcker (typsdef, typdec, prolog )
+domain (typsdef, typdec, prolog ) = checker (typsdef, typdec, prolog )
 
 -- domain :: Either ParseError Prolog
 -- domain (Right (PL p )) = chcker p

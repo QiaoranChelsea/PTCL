@@ -24,9 +24,8 @@ import Text.Megaparsec.Expr
 
 parseFromFile p file = runParser p file <$> readFile file
 
-
 split :: (Either (ParseError Char Void) Prolog) -> String  
-split a@(Right (PL p@(t,b,c) )) = printReport (chcker p) t c 
+split a@(Right (PL p@(t,b,c) )) = printReport (checker p) t c 
 split b@(Left err)      = parseErrorPretty err  
 
 runPTCL file  = (split <$> parseFromFile parser file ) >>= putStrLn
