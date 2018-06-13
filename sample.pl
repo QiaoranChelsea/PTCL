@@ -31,7 +31,6 @@ age(mona, 6).
 age(jacki, 19, 19).
 age(20,marge).
 
-doubleAge(A,T):-  age(Y,A) , T is A * 2.
 
 married_(abe,mona).
 married_(clancy,jackie).
@@ -50,6 +49,7 @@ isEqual(X,Y) :- X = Y.
 comTwo(X,Y) :- X = 5 , age(X,Y).
 
 double(X, Y) :- X * 2 is Y.
+doubleAge(A,T):-  age(Y,A) , T is A * 2.
 
 myTree(leaf).
 myTree(node(leaf , leaf, leaf)).

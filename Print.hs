@@ -137,14 +137,18 @@ printVarInS a m'@(m,s) def va = case findInSub s a  of
                                                                                                                                   
 findCons :: TypeDef -> AtomName -> Maybe String
 findCons [] _ = Nothing
-findCons (((DataT name _ cs ),_):xs) n = case findCon n cs of
+findCons (((DataT name t cs ),_):xs) n = case findCon n cs of
                                          Nothing -> Nothing
-                                         Just _ ->  Just name
+                                         Just _ ->  case t of 
+                                             [] -> Just name 
+                                             _ -> Just (name ++ " " ++ printGList t show " ")
+                                             
 findCons _  n = Nothing
+
 
 printArgType :: Argument  -> VarMap -> TypeDef -> String
 printArgType (Atom a ) _  def =  case findCons def a of
-                                Just x -> show x
+                                Just x ->  x
                                 Nothing -> "atom"
 printArgType (LitI a ) _ _ =  "int"
 printArgType (LitS a ) _ _ = "string"
